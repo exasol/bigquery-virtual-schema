@@ -44,10 +44,11 @@ Find all the documentation in the [Virtual Schemas project][vs-doc].
 
 Running the Virtual Schema requires a Java Runtime version 11 or later.
 
-| Dependency                                                         | Purpose                                                | License                           |
-|--------------------------------------------------------------------|--------------------------------------------------------|-----------------------------------|
-| [Exasol Virtual Schema JDBC][virtual-schema-common-jdbc]           | Common JDBC functions for Virtual Schemas adapters     | MIT License                       |
-| [Exasol Error Reporting][exasol-error-reporting]                   | Creating unified error messages                        | MIT License                       |
+| Dependency                                                         | Purpose                                                | License                                           |
+|--------------------------------------------------------------------|--------------------------------------------------------|---------------------------------------------------|
+| [Exasol Virtual Schema JDBC][virtual-schema-common-jdbc]           | Common JDBC functions for Virtual Schemas adapters     | MIT License                                       |
+| [Big Query JDBC driver][bigquery-jdbc-driver]                      | JDBC driver for Big Query data source                  | See [Big Query JDBC driver][bigquery-jdbc-driver] |
+| [Exasol Error Reporting][exasol-error-reporting]                   | Creating unified error messages                        | MIT License                                       |
 
 ### Test Dependencies
 
@@ -74,6 +75,7 @@ Running the Virtual Schema requires a Java Runtime version 11 or later.
 | [Sonatype OSS Index Maven Plugin][sonatype-oss-index-maven-plugin] | Checking dependencies vulnerability                    | ASL2                          |
 
 [virtual-schema-common-jdbc]: https://github.com/exasol/virtual-schema-common-jdbc
+[bigquery-jdbc-driver]: https://cloud.google.com/bigquery/providers/simba-drivers/
 [exasol-error-reporting]: https://github.com/exasol/error-reporting-java/
 
 [exasol-hamcrest]: https://github.com/exasol/hamcrest-resultset-matcher
