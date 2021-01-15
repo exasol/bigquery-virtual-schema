@@ -93,7 +93,7 @@ STRING             |  ✓        | VARCHAR(65535)            |
 TIME               |  ✓        | VARCHAR(16)               | 
 TIMESTAMP          |  ✓        | TIMESTAMP                 | Expected range for correct mapping: 1582-10-15 00:00:01 .. 9999-12-31 23:59:59.9999. JDBC driver maps dates before 1582-10-15 00:00:01 incorrectly.  Example of incorrect mapping: 1582-10-14 22:00:01 -> 1582-10-04 22:00:01
 
-If you need to use currently unsupported data types or find a way around known limitations, please, create a github issue in the [VS repository](https://github.com/exasol/virtual-schemas/issues).
+If you need to use currently unsupported data types or find a way around known limitations, please, [create a GitHub issue](https://github.com/exasol/bigquery-virtual-schema/issues).
 
 ## Performance
 
