@@ -1,4 +1,4 @@
-# Big Query Virtual Schema 2.0.0, released 2021-03-??
+# Big Query Virtual Schema 2.0.0, released 2021-03-03
 
 Code name: Removed `SQL_DIALECT` property
 
