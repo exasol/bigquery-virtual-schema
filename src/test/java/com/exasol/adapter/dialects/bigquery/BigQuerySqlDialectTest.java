@@ -32,7 +32,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.PropertyValidationException;
+import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.rewriting.ImportIntoTemporaryTableQueryRewriter;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -83,7 +85,8 @@ class BigQuerySqlDialectTest {
                         CURRENT_TIMESTAMP, DATE_TRUNC, DAY, EXTRACT, MINUTE, MONTH, SECOND, WEEK, YEAR, ST_X, ST_Y,
                         ST_LENGTH, ST_NUMPOINTS, ST_AREA, ST_BOUNDARY, ST_CENTROID, ST_CONTAINS, ST_DIFFERENCE,
                         ST_DIMENSION, ST_DISJOINT, ST_DISTANCE, ST_EQUALS, ST_INTERSECTION, ST_INTERSECTS, ST_ISEMPTY,
-                        ST_TOUCHES, ST_UNION, ST_WITHIN, CAST, TO_TIMESTAMP, BIT_AND, BIT_OR, BIT_XOR, CASE, HASH_MD5));
+                        ST_TOUCHES, ST_UNION, ST_WITHIN, CAST, TO_TIMESTAMP, BIT_AND, BIT_OR, BIT_XOR, CASE, HASH_MD5,
+                        BIT_LSHIFT, BIT_RSHIFT, INITCAP));
     }
 
     @Test
@@ -123,9 +126,9 @@ class BigQuerySqlDialectTest {
     @Test
     void testGetSupportedProperties() {
         assertThat(this.dialect.getSupportedProperties(),
-                containsInAnyOrder(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, CATALOG_NAME_PROPERTY,
-                        SCHEMA_NAME_PROPERTY, TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY,
-                        DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY));
+                containsInAnyOrder(CONNECTION_NAME_PROPERTY, CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY,
+                        TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
+                        LOG_LEVEL_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY));
     }
 
     @CsvSource({ "5Customers, `5Customers`", //
@@ -173,7 +176,7 @@ class BigQuerySqlDialectTest {
         final AdapterProperties adapterProperties = new AdapterProperties(
                 Map.of(BIGQUERY_ENABLE_IMPORT_PROPERTY, "TRUE"));
         final BigQuerySqlDialect dialect = new BigQuerySqlDialect(connectionFactory, adapterProperties);
-        assertThat(dialect.createQueryRewriter(), instanceOf(ImportIntoQueryRewriter.class));
+        assertThat(dialect.createQueryRewriter(), instanceOf(ImportIntoTemporaryTableQueryRewriter.class));
     }
 
     @Test
@@ -185,7 +188,7 @@ class BigQuerySqlDialectTest {
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 dialect::validateProperties);
         assertThat(exception.getMessage(),
-                containsString("The value 'WRONG VALUE' for the property BIGQUERY_ENABLE_IMPORT is invalid. "
-                        + "It has to be either 'true' or 'false' (case insensitive)"));
+                containsString("The value 'WRONG VALUE' for the property 'BIGQUERY_ENABLE_IMPORT' is invalid."
+                        + " It has to be either 'true' or 'false' (case insensitive)"));
     }
 }

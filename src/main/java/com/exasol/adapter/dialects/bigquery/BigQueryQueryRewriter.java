@@ -10,7 +10,10 @@ import java.util.regex.Pattern;
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.dialects.SqlGenerator;
+import com.exasol.adapter.dialects.rewriting.ImportIntoTemporaryTableQueryRewriter;
+import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.SqlStatement;
@@ -18,7 +21,7 @@ import com.exasol.adapter.sql.SqlStatement;
 /**
  * This class implements a BigQuery-specific query rewriter.
  */
-public class BigQueryQueryRewriter extends ImportIntoQueryRewriter{
+public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
     private static final double[] TEN_POWERS = { 10d, 100d, 1000d, 10000d, 100000d, 1000000d };
     @SuppressWarnings("squid:S4784") // this pattern is secure
@@ -59,14 +62,17 @@ public class BigQueryQueryRewriter extends ImportIntoQueryRewriter{
                 appendQueryForEmptyTable(builder, metaData);
             }
         }
-        return builder.toString();
+        final String rewrittenQuery = builder.toString();
+        LOGGER.fine(() -> "Rewritten query: " + rewrittenQuery);
+        return rewrittenQuery;
     }
 
     private String getQueryFromStatement(final SqlStatement statement, final AdapterProperties properties)
             throws AdapterException {
         final SqlGenerationContext context = new SqlGenerationContext(properties.getCatalogName(),
                 properties.getSchemaName(), false);
-        return statement.accept(this.dialect.getSqlGenerationVisitor(context));
+        final SqlGenerator sqlGeneratorVisitor = this.dialect.getSqlGenerator(context);
+        return sqlGeneratorVisitor.generateSqlFor(statement);
     }
 
     private void appendQueryForEmptyTable(final StringBuilder builder, final ResultSetMetaData metaData)
