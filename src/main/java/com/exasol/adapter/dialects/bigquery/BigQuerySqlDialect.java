@@ -18,6 +18,8 @@ import java.util.logging.Logger;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.rewriting.ImportIntoTemporaryTableQueryRewriter;
+import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
@@ -56,12 +58,18 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     }
 
     @Override
+    public SqlGenerator getSqlGenerator(final SqlGenerationContext context) {
+        return new BigQueryGenerationVisitor(this, context);
+    }
+
+    @Override
     protected QueryRewriter createQueryRewriter() {
         if (this.properties.containsKey(BIGQUERY_ENABLE_IMPORT_PROPERTY)
                 && "true".equalsIgnoreCase(this.properties.get(BIGQUERY_ENABLE_IMPORT_PROPERTY))) {
             LOGGER.warning("Attention: IMPORT is activated for the BIGQUERY dialect. "
                     + "Please be aware that using IMPORT with this dialect requires disabling important security features and is therefore not recommended!");
-            return new ImportIntoQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
+            return new ImportIntoTemporaryTableQueryRewriter(this, createRemoteMetadataReader(),
+                    this.connectionFactory);
         } else {
             return new BigQueryQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
         }
@@ -88,7 +96,8 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
                         CURRENT_TIMESTAMP, DATE_TRUNC, DAY, EXTRACT, MINUTE, MONTH, SECOND, WEEK, YEAR, ST_X, ST_Y,
                         ST_LENGTH, ST_NUMPOINTS, ST_AREA, ST_BOUNDARY, ST_CENTROID, ST_CONTAINS, ST_DIFFERENCE,
                         ST_DIMENSION, ST_DISJOINT, ST_DISTANCE, ST_EQUALS, ST_INTERSECTION, ST_INTERSECTS, ST_ISEMPTY,
-                        ST_TOUCHES, ST_UNION, ST_WITHIN, CAST, TO_TIMESTAMP, BIT_AND, BIT_OR, BIT_XOR, CASE, HASH_MD5) //
+                        ST_TOUCHES, ST_UNION, ST_WITHIN, CAST, TO_TIMESTAMP, BIT_AND, BIT_OR, BIT_XOR, CASE, HASH_MD5,
+                        BIT_LSHIFT, BIT_RSHIFT, INITCAP) //
                 .addAggregateFunction(COUNT, COUNT_STAR, COUNT_DISTINCT, SUM, SUM_DISTINCT, MIN, MAX, AVG, AVG_DISTINCT,
                         FIRST_VALUE, LAST_VALUE, STDDEV, STDDEV_DISTINCT, STDDEV_POP, STDDEV_POP_DISTINCT, STDDEV_SAMP,
                         STDDEV_SAMP_DISTINCT, VARIANCE, VARIANCE_DISTINCT, VAR_POP, VAR_POP_DISTINCT, VAR_SAMP,

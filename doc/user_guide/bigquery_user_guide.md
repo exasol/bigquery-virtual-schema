@@ -1,18 +1,18 @@
 # Big Query SQL Dialect User Guide
 
-The Big Query SQL dialect allows you connect to the [Google Big Query](https://cloud.google.com/bigquery/), Google's serverless, enterprise data warehouse.
+The Big Query SQL dialect allows you connecting to the [Google Big Query](https://cloud.google.com/bigquery/), Google's serverless, enterprise data warehouse.
 
 ## JDBC Driver
 
 Download the [Simba JDBC Driver for Google BigQuery](https://cloud.google.com/bigquery/providers/simba-drivers/).
 
-## Uploading the JDBC Driver to EXAOperation
+## Uploading the JDBC Driver to BucketFS
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) 
 1. [Upload the driver to BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm)
 
 **Hint**: Magnitude Simba driver contains a lot of jar files, but you can upload all of them together as an archive (`.tar.gz`, for example).
-The archive will be unpacked automatically in the bucket and you can access the files using the following path pattern '<your bucket>/<archive's name without extension>/<name of a file form the archive>.jar'
+The archive will be unpacked automatically in the bucket, and you can access the files using the following path pattern '<your bucket>/<archive's name without extension>/<name of a file form the archive>.jar'
 
 Leave only `.jar` files in the archive. It will help you to generate a list for adapter script later. 
 
@@ -33,7 +33,7 @@ List all the JAR files from Magnitude Simba JDBC driver.
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_BIGQUERY AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-8.0.0-bigquery-1.0.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-9.0.1-bigquery-1.0.0.jar;
     %jar /buckets/<BFS service>/<bucket>/GoogleBigQueryJDBC42.jar;
     ...
     ...
@@ -69,12 +69,10 @@ Below you see how a Big Query Virtual Schema is created. Please note that you ha
 CREATE VIRTUAL SCHEMA <virtual schema name>
     USING SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_BIGQUERY
     WITH
-    SQL_DIALECT = 'BIGQUERY'
     CONNECTION_NAME = 'BIGQUERY_JDBC_CONNECTION'
-    CATALOG_NAME = '<catalog name>'
-    SCHEMA_NAME = '<schema name>';
+    CATALOG_NAME = '<project name>'
+    SCHEMA_NAME = '<dataset name>';
 ```
-
 
 ## Data Types Conversion
 
@@ -93,15 +91,13 @@ STRING             |  ✓        | VARCHAR(65535)            |
 TIME               |  ✓        | VARCHAR(16)               | 
 TIMESTAMP          |  ✓        | TIMESTAMP                 | Expected range for correct mapping: 1582-10-15 00:00:01 .. 9999-12-31 23:59:59.9999. JDBC driver maps dates before 1582-10-15 00:00:01 incorrectly.  Example of incorrect mapping: 1582-10-14 22:00:01 -> 1582-10-04 22:00:01
 
-If you need to use currently unsupported data types or find a way around known limitations, please, [create a GitHub issue](https://github.com/exasol/bigquery-virtual-schema/issues).
-
 ## Performance
 
 Please be aware that the current implementation of the dialect can only handle result sets with limited size (a few thousand rows).
-If you need to process a large amount of data, please contact our support team. Another implementation of the dialect with a performance improvement (using `IMPORT INTO`) is available, but not documented for self-service because of 
+If you need to process a large amount of data, please contact our support team. Another implementation of the dialect with a performance improvement (using `IMPORT INTO`) is available, but not documented for self-service because of: 
 
 1. the complex installation process
-2. security risks (a user has to disable the drivers' security manager to use it)
+1. security risks (a user has to disable the drivers' security manager to use it)
 
 ## Testing information
 

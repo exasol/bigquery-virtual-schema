@@ -6,7 +6,7 @@ import java.sql.Types;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
-import com.exasol.adapter.jdbc.JdbcTypeDescription;
+import com.exasol.adapter.jdbc.JDBCTypeDescription;
 import com.exasol.adapter.metadata.DataType;
 
 /**
@@ -26,7 +26,7 @@ public class BigQueryColumnMetadataReader extends BaseColumnMetadataReader {
     }
 
     @Override
-    public DataType mapJdbcType(final JdbcTypeDescription jdbcTypeDescription) {
+    public DataType mapJdbcType(final JDBCTypeDescription jdbcTypeDescription) {
         if (jdbcTypeDescription.getJdbcType() == Types.TIME) {
             return DataType.createVarChar(30, DataType.ExaCharset.UTF8);
         }
