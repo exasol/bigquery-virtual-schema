@@ -9,7 +9,16 @@ import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.dialects.rewriting.SqlGenerationVisitor;
 import com.exasol.adapter.sql.*;
 
+/**
+ * This class generates SQL queries for the {@link BigQuerySqlDialect}.
+ */
 public class BigQueryGenerationVisitor extends SqlGenerationVisitor {
+    /**
+     * Create a new instance of the {@link BigQueryGenerationVisitor}.
+     *
+     * @param dialect {@link BigQuerySqlDialect} SQL dialect
+     * @param context SQL generation context
+     */
     public BigQueryGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
     }
