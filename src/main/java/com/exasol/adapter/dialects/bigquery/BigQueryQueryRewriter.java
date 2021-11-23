@@ -1,12 +1,5 @@
 package com.exasol.adapter.dialects.bigquery;
 
-import java.math.BigInteger;
-import java.sql.*;
-import java.util.StringJoiner;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
@@ -18,16 +11,25 @@ import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.SqlStatement;
 
+import java.math.BigInteger;
+import java.sql.*;
+import java.util.StringJoiner;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * This class implements a BigQuery-specific query rewriter.
  */
 public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
-    private static final double[] TEN_POWERS = { 10d, 100d, 1000d, 10000d, 100000d, 1000000d };
+    private static final double[] TEN_POWERS = {10d, 100d, 1000d, 10000d, 100000d, 1000000d};
     @SuppressWarnings("squid:S4784") // this pattern is secure
     private static final Pattern DATE_PATTERN = Pattern.compile("(\\d{4})-(\\d{1,2})-(\\d{1,2})");
     @SuppressWarnings("squid:S4784") // this pattern is secure
     private static final Pattern TIME_PATTERN = Pattern.compile("(\\d{1,2}):(\\d{1,2}):(\\d{1,2})(?:\\.(\\d{1,6}))?");
+    private static final String CAST = "CAST";
+    private static final String CAST_NULL_AS_VARCHAR_4 = CAST + " (NULL AS VARCHAR(4))";
 
     /**
      * Create a new instance of the {@link BigQueryQueryRewriter}.
@@ -37,7 +39,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
      * @param connectionFactory    factory for the JDBC connection to remote data source
      */
     public BigQueryQueryRewriter(final SqlDialect dialect, final RemoteMetadataReader remoteMetadataReader,
-            final ConnectionFactory connectionFactory) {
+                                 final ConnectionFactory connectionFactory) {
         super(dialect, remoteMetadataReader, connectionFactory);
     }
 
@@ -134,32 +136,32 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
     private void appendVarchar(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
         final String stringLiteral = this.dialect.getStringLiteral(resultSet.getString(columnName));
-        builder.append(resultSet.wasNull() ? "CAST (NULL AS VARCHAR(4))" : stringLiteral);
+        builder.append(resultSet.wasNull() ? CAST_NULL_AS_VARCHAR_4 : stringLiteral);
     }
 
     private void appendBigInt(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
         final String string = resultSet.getString(columnName);
-        builder.append(resultSet.wasNull() ? "CAST (NULL AS DECIMAL(19,0))" : new BigInteger(string));
+        builder.append(resultSet.wasNull() ? CAST + " (NULL AS DECIMAL(19,0))" : new BigInteger(string));
     }
 
     private void appendDouble(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
         final double value = resultSet.getDouble(columnName);
-        builder.append(resultSet.wasNull() ? "CAST (NULL AS DOUBLE)" : value);
+        builder.append(resultSet.wasNull() ? CAST + " (NULL AS DOUBLE)" : value);
     }
 
     private void appendBoolean(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
         final boolean value = resultSet.getBoolean(columnName);
-        builder.append(resultSet.wasNull() ? "CAST (NULL AS BOOLEAN)" : value);
+        builder.append(resultSet.wasNull() ? CAST + " (NULL AS BOOLEAN)" : value);
     }
 
     private void appendDate(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
         final String value = resultSet.getString(columnName);
         if (value == null) {
-            builder.append("CAST (NULL AS VARCHAR(4))");
+            builder.append(CAST_NULL_AS_VARCHAR_4);
         } else {
             builder.append("'");
             builder.append(castDate(value));
@@ -184,7 +186,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
             throws SQLException {
         final String value = resultSet.getString(columnName);
         if (value == null) {
-            builder.append("CAST (NULL AS VARCHAR(4))");
+            builder.append(CAST_NULL_AS_VARCHAR_4);
         } else {
             builder.append("'");
             builder.append(castTimestamp(value));
@@ -233,7 +235,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
             throws SQLException {
         final String value = resultSet.getString(columnName);
         if (value == null) {
-            builder.append("CAST (NULL AS VARCHAR(4))");
+            builder.append(CAST_NULL_AS_VARCHAR_4);
         } else {
             builder.append(this.dialect.getStringLiteral(value));
         }
