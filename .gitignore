@@ -23,3 +23,10 @@ Scripts
 **/*.log
 .directory
 venv/
+
+~*
+*.lock
+*.bak
+*.orig
+*.old
+*.md.html
