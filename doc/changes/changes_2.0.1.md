@@ -1,4 +1,4 @@
-# Virtual Schema for BigQuery 2.0.1, released 2021-11-23
+# Virtual Schema for BigQuery 2.0.1, released 2021-11-24
 
 Code name: Dependency Updates
 
