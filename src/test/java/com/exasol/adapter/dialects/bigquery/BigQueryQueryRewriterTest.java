@@ -136,7 +136,7 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @ParameterizedTest
     void testRewriteWithDatetime(final String valueToConvert, final String expectedValue)
             throws AdapterException, SQLException {
-        assertQueryWithOneStringValue("timestamp", 93, valueToConvert,
+        assertQueryWithOneStringValue("timestamp", Types.TIMESTAMP, valueToConvert,
                 "SELECT * FROM VALUES ('" + expectedValue + "')");
     }
 
