@@ -1,85 +1,58 @@
 package com.exasol.adapter.dialects.bigquery.zip;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.*;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.util.*;
+import java.nio.file.*;
+import java.util.List;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
-import lombok.Getter;
+import java.util.stream.Collectors;
 
 /**
- * Download zip file from URL
+ * Download zip archive from URL, support direct extract from stream
  */
 public class ZipDownloader {
 
+    private enum Mode {
+        DOWNLOAD_ARCHIVE, EXTRACT_TO_LOCAL_FOLDER;
+    }
+
     private static final Logger LOGGER = Logger.getLogger(ZipDownloader.class.getName());
 
-    private static final String JDBC_DOWNLOAD_URL = "https://storage.googleapis.com/simba-bq-release/jdbc/";
-    private static final String FILENAME = "SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029.zip";
-    private static final String TEMP_FOLDER = "target";
+    final String downloadUrl;
+    final Path localCopy;
 
-    final File localCopy;
-
-    public ZipDownloader() {
-        this.localCopy = new File(TEMP_FOLDER, FILENAME);
+    public ZipDownloader(final String downloadUrl, final Path destinationFolder) {
+        this.downloadUrl = downloadUrl;
+        this.localCopy = destinationFolder;
     }
 
-    public List<String> inventory() {
-        final List<String> result = new ArrayList<>();
-        try (AutoClosableZipFile zf = new AutoClosableZipFile(getLocalCopy())) {
-            final Enumeration<? extends ZipEntry> enumeration = zf.getZipfile().entries();
-            while (enumeration.hasMoreElements()) {
-                final String name = enumeration.nextElement().getName();
-                if ((name != null) && name.endsWith(".jar")) {
-                    LOGGER.info("adding " + name);
-                    result.add(name);
-                }
-            }
-        } catch (final IOException exception) {
-            throw new ZipException(exception);
-        }
-        return result;
+    public List<Path> inventory(final String globPattern) throws IOException {
+        final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
+        return Files.list(this.localCopy) //
+                .filter(p -> matcher.matches(p.getFileName())) //
+                .collect(Collectors.toList());
     }
 
-    public File download() throws IOException, URISyntaxException {
-        if (this.localCopy.exists()) {
-            return this.localCopy;
-        }
-        final URL remote = new URI(JDBC_DOWNLOAD_URL).resolve(FILENAME).toURL();
+    public boolean localFolderExists() {
+        return Files.exists(this.localCopy);
+    }
+
+    public void extractToLocalFolder() throws IOException, URISyntaxException {
+        download(Mode.EXTRACT_TO_LOCAL_FOLDER);
+    }
+
+    private void download(final Mode mode) throws IOException, URISyntaxException {
+        final URL remote = new URI(this.downloadUrl).toURL();
         LOGGER.info("Download " + remote + " to " + this.localCopy);
-        try (ReadableByteChannel input = Channels.newChannel(remote.openStream());
-                FileOutputStream output = new FileOutputStream(this.localCopy)) {
-            output.getChannel().transferFrom(input, 0, Long.MAX_VALUE);
-        }
-        return this.localCopy;
-    }
-
-    public File getLocalCopy() {
-        try {
-            return download();
-        } catch (IOException | URISyntaxException exception) {
-            throw new ZipException(exception);
-        }
-    }
-
-    private static class AutoClosableZipFile implements AutoCloseable {
-        @Getter
-        final ZipFile zipfile;
-
-        AutoClosableZipFile(final File file) throws IOException {
-            this.zipfile = new ZipFile(file);
-        }
-
-        @Override
-        public void close() {
-            try {
-                this.zipfile.close();
-            } catch (final IOException exception) {
-                throw new ZipException(exception);
+        try (InputStream input = remote.openStream()) {
+            switch (mode) {
+            case EXTRACT_TO_LOCAL_FOLDER:
+                new ZipExtractor(this.localCopy).extract(input);
+                break;
+            default:
+                Files.copy(input, this.localCopy);
+                break;
             }
         }
     }
