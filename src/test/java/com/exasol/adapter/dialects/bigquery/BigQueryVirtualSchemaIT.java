@@ -2,12 +2,13 @@ package com.exasol.adapter.dialects.bigquery;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.*;
 
-import com.exasol.adapter.dialects.bigquery.zip.*;
+import com.exasol.adapter.dialects.bigquery.util.BucketFsFolder;
+import com.exasol.adapter.dialects.bigquery.util.JdbcDriver;
+import com.exasol.adapter.dialects.bigquery.util.zip.ZipDownloader;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
 import com.exasol.exasoltestsetup.ExasolTestSetupFactory;
@@ -20,8 +21,7 @@ class BigQueryVirtualSchemaIT {
     static final JdbcDriver JDBC_DRIVER = new JdbcDriver() //
             .withSourceUrl("https://storage.googleapis.com/simba-bq-release/jdbc/" //
                     + "SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029.zip") //
-            .withLocalFolder("target") //
-            .withExasolBucketFsFolder("bigquery-jdbc-driver");
+            .withLocalFolder("target");
 
     @BeforeAll
     static void beforeAll() throws Exception {
@@ -36,32 +36,24 @@ class BigQueryVirtualSchemaIT {
             downloader.extractToLocalFolder();
         }
 
-        // won't delete a folder, at least not if folder is not empty
-        EXASOL.getDefaultBucket().deleteFileNonBlocking(JDBC_DRIVER.getBucketFsFolder());
+        final BucketFsFolder bucketFs = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
+        // ensure there is no file with name we want to use for folder
+        bucketFs.deleteFile();
 
-        // 1. Ask Sebastian: Shouldn't purge DB clean bucket fs, too?
-        // see com.exasol.containers.ExasolContainer#purgeDatabase()
-        // INFO: Purging database for a clean setup
-
-        final BucketFsInventory bucketFs = new BucketFsInventory(EXASOL.getDefaultBucket(),
-                JDBC_DRIVER.getBucketFsFolder());
-        final List<Path> files = downloader.inventory("*.jar");
-
-        for (final Path path : files) {
-            final String target = JDBC_DRIVER.getPathInBucketFs(path);
-            if (bucketFs.contains(path)) {
+        for (final Path file : downloader.inventory("*.jar")) {
+            final String target = JDBC_DRIVER.getPathInBucketFs(file);
+            if (bucketFs.contains(file)) {
                 LOGGER.fine("File already available in bucketfs: " + target);
             } else {
                 LOGGER.fine("Uploading to bucketfs: " + target);
-                EXASOL.getDefaultBucket().uploadFile(path, target);
+                EXASOL.getDefaultBucket().uploadFile(file, target);
             }
         }
     }
 
     @Test
     void test() throws BucketAccessException {
-        final BucketFsInventory inventory = new BucketFsInventory(EXASOL.getDefaultBucket(),
-                JDBC_DRIVER.getBucketFsFolder());
+        final BucketFsFolder inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
         inventory.fullPaths().forEach(f -> System.out.println("- " + f));
     }
 }

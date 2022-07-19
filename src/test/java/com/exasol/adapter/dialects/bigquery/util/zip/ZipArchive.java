@@ -1,4 +1,4 @@
-package com.exasol.adapter.dialects.bigquery.zip;
+package com.exasol.adapter.dialects.bigquery.util.zip;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -1,25 +1,17 @@
-package com.exasol.adapter.dialects.bigquery.zip;
+package com.exasol.adapter.dialects.bigquery.util;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.Getter;
-
 public class JdbcDriver {
 
     private static final Pattern FILENAME = Pattern.compile("([^/]*)\\.[^.]*$");
 
-    private static final String removeTrailingSlash(final String folder) {
-        return folder.replaceFirst("/$", "");
-    }
-
     private String sourceUrl;
     private String filename;
     private Path localFolder;
-    @Getter
-    private String bucketFsFolder;
 
     public JdbcDriver withSourceUrl(final String value) {
         this.sourceUrl = value;
@@ -41,11 +33,6 @@ public class JdbcDriver {
         return this;
     }
 
-    public JdbcDriver withExasolBucketFsFolder(final String value) {
-        this.bucketFsFolder = removeTrailingSlash(value);
-        return this;
-    }
-
     public Path getLocalCopy() {
         return this.localFolder.resolve(this.filename);
     }
@@ -54,8 +41,12 @@ public class JdbcDriver {
         return this.sourceUrl;
     }
 
+    public String getBucketFsFolder() {
+        return this.filename;
+    }
+
     public String getPathInBucketFs(final Path path) {
-        return this.bucketFsFolder + "/" + path.getFileName().toString();
+        return getBucketFsFolder() + "/" + path.getFileName().toString();
     }
 
 }
