@@ -1,63 +1,62 @@
 package com.exasol.adapter.dialects.bigquery.testcontainer;
 
-import org.testcontainers.containers.JdbcDatabaseContainer;
+import java.nio.file.Path;
+import java.time.Duration;
+
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
-public class BigQueryEmulatorContainer extends JdbcDatabaseContainer<BigQueryEmulatorContainer> {
+import com.google.cloud.bigquery.BigQuery;
+import com.google.cloud.bigquery.BigQueryOptions;
+
+public class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContainer> {
 
     private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse("ghcr.io/goccy/bigquery-emulator");
     private static final int PORT = 9050;
-    private static final String PROJECT_NAME = "big-query-test-project";
+    private static final String PROJECT_ID = "test";
+    private Path dataYaml;
 
-    public BigQueryEmulatorContainer() {
+    public BigQueryEmulatorContainer(final Path dataYaml) {
         this(DEFAULT_IMAGE_NAME);
+        this.dataYaml = dataYaml;
     }
 
     public BigQueryEmulatorContainer(final DockerImageName dockerImageName) {
         super(dockerImageName);
         dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
         withExposedPorts(PORT);
-        withCommand("/bin/sh", "-c", "/bin/bigquery-emulator --project=" + PROJECT_NAME + " --port=" + PORT);
-        withStartupTimeoutSeconds(5);
+        final String dataOption = dataYaml == null ? "" : " --data-from-yaml" + dataYaml.toAbsolutePath().toString();
+        withCommand("/bin/sh", "-c", "/bin/bigquery-emulator --project=" + PROJECT_ID + " --port=" + PORT + dataOption);
+        waitingFor(Wait.forLogMessage("^\\[bigquery-emulator\\] listening at 0\\.0\\.0\\.0:" + PORT + ".*", 1));
+        withStartupTimeout(Duration.ofSeconds(10));
         withStartupAttempts(1);
         withReuse(false);
     }
 
-    public String getProjectName() {
-        return PROJECT_NAME;
+    public String getProjectId() {
+        return PROJECT_ID;
     }
 
     private int getEmulatorPort() {
         return getMappedPort(PORT);
     }
 
-    @Override
-    public String getDriverClassName() {
-        return "com.simba.googlebigquery.jdbc.Driver";
-    }
-
-    @Override
-    public String getJdbcUrl() {
-        final String url = "http://" + getHost() + ":" + getEmulatorPort();
-        return "jdbc:bigquery://" + url + ";ProjectId=" + getProjectName() //
+    public String getBigQueryJdbcUrl() {
+        final String url = getUrl();
+        return "jdbc:bigquery://" + url + ";ProjectId=" + getProjectId() //
                 + ";RootURL=" + url //
                 + ";OAuthType=2;OAuthAccessToken=a25c7cfd36214f94a79d" //
                 + ";MaxResults=1000;MetaDataFetchThreadCount=32";
     }
 
-    @Override
-    public String getUsername() {
-        return "user";
+    private String getUrl() {
+        return "http://" + getHost() + ":" + getEmulatorPort();
+        // return "http://localhost:9050";
     }
 
-    @Override
-    public String getPassword() {
-        return "pass";
-    }
-
-    @Override
-    protected String getTestQueryString() {
-        return "select 1";
+    public BigQuery getClient() {
+        return BigQueryOptions.newBuilder().setHost(getUrl()).setProjectId(getProjectId()).build().getService();
     }
 
     @Override

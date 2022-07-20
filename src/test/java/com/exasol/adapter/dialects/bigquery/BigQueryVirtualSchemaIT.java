@@ -15,6 +15,7 @@ import com.exasol.adapter.dialects.bigquery.util.zip.ZipDownloader;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
 import com.exasol.exasoltestsetup.ExasolTestSetupFactory;
+import com.google.cloud.bigquery.*;
 
 @Tag("integration")
 @Testcontainers
@@ -28,7 +29,8 @@ class BigQueryVirtualSchemaIT {
             .withLocalFolder("target");
 
     @Container
-    static BigQueryEmulatorContainer bigQuery = new BigQueryEmulatorContainer();
+    static BigQueryEmulatorContainer bigQuery = new BigQueryEmulatorContainer(
+            Paths.get("src/test/resources/bigquery-data.yaml"));
 
     @BeforeAll
     static void beforeAll() throws Exception {
@@ -59,8 +61,34 @@ class BigQueryVirtualSchemaIT {
     }
 
     @Test
-    void test() throws BucketAccessException {
+    void test() throws BucketAccessException, JobException, InterruptedException {
         final BucketFsFolder inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
         inventory.fullPaths().forEach(f -> System.out.println("- " + f));
+
+        final BigQuery client = bigQuery.getClient();
+        TableResult result = client.query(QueryJobConfiguration.of("select 2 * 3"));
+        result.iterateAll().forEach(row -> System.out.println("row: " + row));
+
+        final DatasetId datasetId = DatasetId.of("mydatasetId" + System.currentTimeMillis());
+
+        client.create(DatasetInfo.newBuilder(datasetId).build());
+
+        final TableId tableId = TableId.of(datasetId.getDataset(), "tableName");
+        final Schema schema = Schema.of(Field.of("id", StandardSQLTypeName.STRING),
+                Field.of("name", StandardSQLTypeName.STRING), Field.of("status", StandardSQLTypeName.BOOL));
+        final TableDefinition tableDefinition = StandardTableDefinition.of(schema);
+        final TableInfo tableInfo = TableInfo.newBuilder(tableId, tableDefinition).build();
+
+        // client.create(tableInfo);
+
+        // client.insertAll(InsertAllRequest.of(tableId, RowToInsert.of(Map.of("id", 1, "name", "a", "status", true))));
+
+        // result = client.query(QueryJobConfiguration.of("select * from " + tableId.toString()));
+        // result = client.query(QueryJobConfiguration.of("CREATE TABLE " + datasetId.getDataset() + ".newtable ("
+        // + "x INT64," + "y STRUCT<" + "a ARRAY<STRING> ," + "b BOOL" + ">)"));
+        // result = client.query(QueryJobConfiguration.of("INSERT `table` (col1) VALUES (42)"));
+        // result = client.query(QueryJobConfiguration.of("select * from " + datasetId.getDataset() + ".newtable"));
+        result = client.query(QueryJobConfiguration.of("select * from dataset1.table_a"));
+        result.iterateAll().forEach(row -> System.out.println("row: " + row));
     }
 }
