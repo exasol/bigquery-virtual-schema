@@ -45,6 +45,5 @@ Code name:
 * Added `org.codehaus.mojo:flatten-maven-plugin:1.2.7`
 * Updated `org.codehaus.mojo:versions-maven-plugin:2.7` to `2.10.0`
 * Updated `org.jacoco:jacoco-maven-plugin:0.8.5` to `0.8.8`
-* Added `org.projectlombok:lombok-maven-plugin:1.18.20.0`
 * Added `org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184`
 * Updated `org.sonatype.ossindex.maven:ossindex-maven-plugin:3.1.0` to `3.2.0`

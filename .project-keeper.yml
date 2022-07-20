@@ -4,7 +4,6 @@ sources:
     modules:
       - integration_tests
       - jar_artifact
-      - lombok
 linkReplacements:
 excludes:
 
