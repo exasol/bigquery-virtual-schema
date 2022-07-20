@@ -1,7 +1,10 @@
 package com.exasol.adapter.dialects.bigquery;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.*;
@@ -15,7 +18,6 @@ import com.exasol.adapter.dialects.bigquery.util.zip.ZipDownloader;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
 import com.exasol.exasoltestsetup.ExasolTestSetupFactory;
-import com.google.cloud.bigquery.*;
 
 @Tag("integration")
 @Testcontainers
@@ -37,29 +39,17 @@ class BigQueryVirtualSchemaIT {
         setupExasolContainer();
     }
 
-    private static void setupExasolContainer() throws Exception {
-        final ZipDownloader monolithic = ZipDownloader.monolithic( //
-                JDBC_DRIVER.getDownloadUrl(), JDBC_DRIVER.getLocalCopy());
+    static void setupWithExtractingUploader()
+            throws IOException, URISyntaxException, BucketAccessException, TimeoutException {
         final ZipDownloader extracting = ZipDownloader.extracting( //
                 JDBC_DRIVER.getDownloadUrl(), JDBC_DRIVER.getLocalCopy());
-
         if (!extracting.localCopyExists()) {
             extracting.download();
-        }
-
-        if (!monolithic.localCopyExists()) {
-            monolithic.download();
         }
 
         final BucketFsFolder bucketFs = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
         // ensure there is no file with name we want to use for folder
         bucketFs.deleteFile();
-        new BucketFsFolder(EXASOL.getDefaultBucket(), "SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029.zip")
-                .deleteFile();
-
-//        EXASOL.getDefaultBucket().uploadFile(monolithic.getLocalCopy(), monolithic.getFilename());
-        EXASOL.getDefaultBucket().uploadFile(monolithic.getLocalCopy(), "extracted/" + monolithic.getFilename());
-
         for (final Path file : extracting.inventory("*.jar")) {
             final String target = JDBC_DRIVER.getPathInBucketFs(file);
             if (bucketFs.contains(file)) {
@@ -71,37 +61,52 @@ class BigQueryVirtualSchemaIT {
         }
     }
 
+    private static void setupExasolContainer() throws Exception {
+        final ZipDownloader monolithic = ZipDownloader.monolithic( //
+                JDBC_DRIVER.getDownloadUrl(), JDBC_DRIVER.getLocalCopy());
+        if (EXASOL.getDefaultBucket().listContents().contains(monolithic.getFilename())) {
+            return;
+        }
+        if (!monolithic.localCopyExists()) {
+            monolithic.download();
+        }
+        EXASOL.getDefaultBucket().uploadFile(monolithic.getLocalCopy(), "/");
+    }
+
+    /**
+     * See https://intranet.srv.exasol.com/display/InTeam/BucketFS+-+Uploading+zip+archives
+     */
     @Test
-    void test() throws BucketAccessException {
-        BucketFsFolder inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
-        inventory.fullPaths().forEach(f -> System.out.println("- " + f));
-        inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), "extracted");
-        inventory.fullPaths().forEach(f -> System.out.println("- " + f));
+    void test() {
+//        BucketFsFolder inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
+//        inventory.fullPaths().forEach(f -> System.out.println("- " + f));
+//        inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), "extracted");
+//        inventory.fullPaths().forEach(f -> System.out.println("- " + f));
 
-        final BigQuery client = bigQuery.getClient();
-        TableResult result = client.query(QueryJobConfiguration.of("select 2 * 3"));
-        result.iterateAll().forEach(row -> System.out.println("row: " + row));
-
-        final DatasetId datasetId = DatasetId.of("mydatasetId" + System.currentTimeMillis());
-
-        client.create(DatasetInfo.newBuilder(datasetId).build());
-
-        final TableId tableId = TableId.of(datasetId.getDataset(), "tableName");
-        final Schema schema = Schema.of(Field.of("id", StandardSQLTypeName.STRING),
-                Field.of("name", StandardSQLTypeName.STRING), Field.of("status", StandardSQLTypeName.BOOL));
-        final TableDefinition tableDefinition = StandardTableDefinition.of(schema);
-        final TableInfo tableInfo = TableInfo.newBuilder(tableId, tableDefinition).build();
-
-        // client.create(tableInfo);
-
-        // client.insertAll(InsertAllRequest.of(tableId, RowToInsert.of(Map.of("id", 1, "name", "a", "status", true))));
-
-        // result = client.query(QueryJobConfiguration.of("select * from " + tableId.toString()));
-        // result = client.query(QueryJobConfiguration.of("CREATE TABLE " + datasetId.getDataset() + ".newtable ("
-        // + "x INT64," + "y STRUCT<" + "a ARRAY<STRING> ," + "b BOOL" + ">)"));
-        // result = client.query(QueryJobConfiguration.of("INSERT `table` (col1) VALUES (42)"));
-        // result = client.query(QueryJobConfiguration.of("select * from " + datasetId.getDataset() + ".newtable"));
-        result = client.query(QueryJobConfiguration.of("select * from dataset1.table_a"));
-        result.iterateAll().forEach(row -> System.out.println("row: " + row));
+//        final BigQuery client = bigQuery.getClient();
+//        TableResult result = client.query(QueryJobConfiguration.of("select 2 * 3"));
+//        result.iterateAll().forEach(row -> System.out.println("row: " + row));
+//
+//        final DatasetId datasetId = DatasetId.of("mydatasetId" + System.currentTimeMillis());
+//
+//        client.create(DatasetInfo.newBuilder(datasetId).build());
+//
+//        final TableId tableId = TableId.of(datasetId.getDataset(), "tableName");
+//        final Schema schema = Schema.of(Field.of("id", StandardSQLTypeName.STRING),
+//                Field.of("name", StandardSQLTypeName.STRING), Field.of("status", StandardSQLTypeName.BOOL));
+//        final TableDefinition tableDefinition = StandardTableDefinition.of(schema);
+//        final TableInfo tableInfo = TableInfo.newBuilder(tableId, tableDefinition).build();
+//
+//        // client.create(tableInfo);
+//
+//        // client.insertAll(InsertAllRequest.of(tableId, RowToInsert.of(Map.of("id", 1, "name", "a", "status", true))));
+//
+//        // result = client.query(QueryJobConfiguration.of("select * from " + tableId.toString()));
+//        // result = client.query(QueryJobConfiguration.of("CREATE TABLE " + datasetId.getDataset() + ".newtable ("
+//        // + "x INT64," + "y STRUCT<" + "a ARRAY<STRING> ," + "b BOOL" + ">)"));
+//        // result = client.query(QueryJobConfiguration.of("INSERT `table` (col1) VALUES (42)"));
+//        // result = client.query(QueryJobConfiguration.of("select * from " + datasetId.getDataset() + ".newtable"));
+//        result = client.query(QueryJobConfiguration.of("select * from dataset1.table_a"));
+//        result.iterateAll().forEach(row -> System.out.println("row: " + row));
     }
 }
