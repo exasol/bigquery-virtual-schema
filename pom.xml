@@ -46,7 +46,7 @@
             <artifactId>error-reporting-java</artifactId>
             <version>0.4.1</version>
         </dependency>
-        <!--Unit test dependencies -->
+        <!-- Unit test dependencies -->
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>virtual-schema-common-jdbc</artifactId>
@@ -94,35 +94,20 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>3.3.0</version>
+            <version>3.3.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>udf-debugging-java</artifactId>
-            <version>0.5.0</version>
+            <version>0.6.4</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- BigQuery JDBC driver -->
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
-            <version>1.127.2</version>
+            <version>2.13.8</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-bigquerystorage</artifactId>
-            <version>1.8.5</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>simba</artifactId>
-            <version>1.2.11.1014</version>
-            <scope>system</scope>
-            <systemPath>/Users/chp/Downloads/SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029/GoogleBigQueryJDBC42.jar</systemPath>
         </dependency>
     </dependencies>
     <build>
@@ -146,7 +131,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>2.4.6</version>
+                <version>2.5.0</version>
                 <executions>
                     <execution>
                         <goals>

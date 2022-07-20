@@ -17,17 +17,20 @@ Code name:
 ### Test Dependency Updates
 
 * Added `com.exasol:exasol-test-setup-abstraction-java:0.3.2`
-* Added `com.exasol:test-db-builder-java:3.3.0`
-* Added `com.exasol:udf-debugging-java:0.5.0`
+* Added `com.exasol:test-db-builder-java:3.3.3`
+* Added `com.exasol:udf-debugging-java:0.6.4`
 * Updated `com.exasol:virtual-schema-common-jdbc:9.0.4` to `9.0.5`
+* Added `com.google.cloud:google-cloud-bigquery:2.13.8`
 * Updated `org.junit.jupiter:junit-jupiter:5.8.1` to `5.8.2`
 * Updated `org.mockito:mockito-junit-jupiter:4.1.0` to `4.6.1`
+* Added `org.testcontainers:jdbc:1.17.3`
+* Added `org.testcontainers:junit-jupiter:1.17.3`
 
 ### Plugin Dependency Updates
 
 * Updated `com.exasol:artifact-reference-checker-maven-plugin:0.3.1` to `0.4.0`
 * Updated `com.exasol:error-code-crawler-maven-plugin:0.6.0` to `1.1.1`
-* Updated `com.exasol:project-keeper-maven-plugin:1.3.2` to `2.4.6`
+* Updated `com.exasol:project-keeper-maven-plugin:1.3.2` to `2.5.0`
 * Updated `io.github.zlika:reproducible-build-maven-plugin:0.13` to `0.15`
 * Updated `org.apache.maven.plugins:maven-clean-plugin:3.1.0` to `2.5`
 * Updated `org.apache.maven.plugins:maven-compiler-plugin:3.8.1` to `3.10.1`
