@@ -36,18 +36,29 @@ class BigQueryVirtualSchemaIT {
     }
 
     private static void setupExasolContainer() throws Exception {
-        final ZipDownloader downloader = new ZipDownloader( //
+        final ZipDownloader monolithic = ZipDownloader.monolithic( //
+                JDBC_DRIVER.getDownloadUrl(), JDBC_DRIVER.getLocalCopy());
+        final ZipDownloader extracting = ZipDownloader.extracting( //
                 JDBC_DRIVER.getDownloadUrl(), JDBC_DRIVER.getLocalCopy());
 
-        if (!downloader.localFolderExists()) {
-            downloader.extractToLocalFolder();
+        if (!extracting.localCopyExists()) {
+            extracting.download();
+        }
+
+        if (!monolithic.localCopyExists()) {
+            monolithic.download();
         }
 
         final BucketFsFolder bucketFs = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
         // ensure there is no file with name we want to use for folder
         bucketFs.deleteFile();
+        new BucketFsFolder(EXASOL.getDefaultBucket(), "SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029.zip")
+                .deleteFile();
 
-        for (final Path file : downloader.inventory("*.jar")) {
+//        EXASOL.getDefaultBucket().uploadFile(monolithic.getLocalCopy(), monolithic.getFilename());
+        EXASOL.getDefaultBucket().uploadFile(monolithic.getLocalCopy(), "extracted/" + monolithic.getFilename());
+
+        for (final Path file : extracting.inventory("*.jar")) {
             final String target = JDBC_DRIVER.getPathInBucketFs(file);
             if (bucketFs.contains(file)) {
                 LOGGER.fine("File already available in bucketfs: " + target);
@@ -59,8 +70,10 @@ class BigQueryVirtualSchemaIT {
     }
 
     @Test
-    void test() throws BucketAccessException, JobException, InterruptedException {
-        final BucketFsFolder inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
+    void test() throws BucketAccessException {
+        BucketFsFolder inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
+        inventory.fullPaths().forEach(f -> System.out.println("- " + f));
+        inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), "extracted");
         inventory.fullPaths().forEach(f -> System.out.println("- " + f));
 
         final BigQuery client = bigQuery.getClient();
