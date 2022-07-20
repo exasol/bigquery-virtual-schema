@@ -1,7 +1,5 @@
 package com.exasol.adapter.dialects.bigquery.testcontainer;
 
-import java.time.Duration;
-
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -19,9 +17,9 @@ public class BigQueryEmulatorContainer extends JdbcDatabaseContainer<BigQueryEmu
         super(dockerImageName);
         dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
         withExposedPorts(PORT);
-        //setWaitStrategy(new LogMessageWaitStrategy().withRegEx("\\[bigquery-emulator\\] listening at .*$"));
-        withCommand("/bin/sh", "-c", "/bin/bigquery-emulator", "--project=" + PROJECT_NAME);
-        withStartupTimeout(Duration.ofSeconds(30));
+        withCommand("/bin/sh", "-c", "/bin/bigquery-emulator --project=" + PROJECT_NAME + " --port=" + PORT);
+        withStartupTimeoutSeconds(5);
+        withStartupAttempts(1);
         withReuse(false);
     }
 
@@ -40,8 +38,11 @@ public class BigQueryEmulatorContainer extends JdbcDatabaseContainer<BigQueryEmu
 
     @Override
     public String getJdbcUrl() {
-        return "jdbc:bigquery://http://" + getHost() + ":" + getEmulatorPort() + "/;ProjectId=" + getProjectName()
-                + ";OAuthType=[AuthValue]";
+        final String url = "http://" + getHost() + ":" + getEmulatorPort();
+        return "jdbc:bigquery://" + url + ";ProjectId=" + getProjectName() //
+                + ";RootURL=" + url //
+                + ";OAuthType=2;OAuthAccessToken=a25c7cfd36214f94a79d" //
+                + ";MaxResults=1000;MetaDataFetchThreadCount=32";
     }
 
     @Override
