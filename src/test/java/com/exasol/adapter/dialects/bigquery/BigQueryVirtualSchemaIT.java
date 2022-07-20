@@ -13,8 +13,6 @@ import com.exasol.adapter.dialects.bigquery.util.BucketFsFolder;
 import com.exasol.adapter.dialects.bigquery.util.JdbcDriver;
 import com.exasol.adapter.dialects.bigquery.util.zip.ZipDownloader;
 import com.exasol.bucketfs.BucketAccessException;
-import com.exasol.exasoltestsetup.ExasolTestSetup;
-import com.exasol.exasoltestsetup.ExasolTestSetupFactory;
 import com.google.cloud.bigquery.*;
 
 @Tag("integration")
@@ -22,7 +20,7 @@ import com.google.cloud.bigquery.*;
 class BigQueryVirtualSchemaIT {
 
     private static final Logger LOGGER = Logger.getLogger(BigQueryVirtualSchemaIT.class.getName());
-    private static final ExasolTestSetup EXASOL = new ExasolTestSetupFactory(Paths.get("dummy.json")).getTestSetup();
+    private static final IntegrationTestSetup EXASOL = new IntegrationTestSetup();
     static final JdbcDriver JDBC_DRIVER = new JdbcDriver() //
             .withSourceUrl("https://storage.googleapis.com/simba-bq-release/jdbc/" //
                     + "SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029.zip") //
