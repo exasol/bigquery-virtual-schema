@@ -71,7 +71,7 @@
 [17]: https://github.com/exasol/hamcrest-resultset-matcher
 [18]: https://github.com/googleapis/java-bigquery
 [19]: https://www.apache.org/licenses/LICENSE-2.0.txt
-[20]: https://netty.io/netty-common/
+[20]: https://netty.io
 [21]: https://www.apache.org/licenses/LICENSE-2.0
 [22]: https://github.com/grpc/grpc-java
 [23]: https://opensource.org/licenses/Apache-2.0
