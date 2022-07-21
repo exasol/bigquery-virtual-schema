@@ -57,8 +57,8 @@ public class IntegrationTestSetup implements AutoCloseable {
         this.adapterScript = createAdapterScript(adapterSchema);
     }
 
-    public static IntegrationTestSetup create() {
-        final BigQueryTestSetup bigQueryTestSetup = createBigQueryTestSetup();
+    public static IntegrationTestSetup create(final TestConfig config) {
+        final BigQueryTestSetup bigQueryTestSetup = createBigQueryTestSetup(config);
         bigQueryTestSetup.start();
         try {
             final ExasolTestSetup exasolTestSetup = new ExasolTestSetupFactory(
@@ -70,8 +70,7 @@ public class IntegrationTestSetup implements AutoCloseable {
         }
     }
 
-    private static BigQueryTestSetup createBigQueryTestSetup() {
-        final TestConfig config = TestConfig.read();
+    private static BigQueryTestSetup createBigQueryTestSetup(final TestConfig config) {
         if (config.hasGoogleCloudCredentials()) {
             LOGGER.info("Using Google Cloud BigQuery setup");
             return BigQueryTestSetup.createGoogleCloudSetup(config);

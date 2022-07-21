@@ -1,4 +1,4 @@
-# Big Query Virtual Schema
+«# Big Query Virtual Schema
 
 [![Build Status](https://github.com/exasol/bigquery-virtual-schema/actions/workflows/ci-build.yml/badge.svg)](https://github.com/exasol/bigquery-virtual-schema/actions/workflows/ci-build.yml)
 
@@ -38,6 +38,7 @@ Find all the documentation in the [Virtual Schemas project][vs-doc].
 ## Information for Developers 
 
 * [Virtual Schema API Documentation][vs-api]
+* [Developers Guide](doc/developers_guide.md)
 
 [virtual-schemas-user-guide]: https://docs.exasol.com/database_concepts/virtual_schemas.htm
 [virtual-schemas]: https://github.com/exasol/virtual-schemas

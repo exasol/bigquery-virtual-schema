@@ -3,6 +3,7 @@ package com.exasol.adapter.dialects.bigquery;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.sql.ResultSet;
 import java.util.List;
@@ -12,23 +13,32 @@ import org.junit.jupiter.api.*;
 
 import com.exasol.adapter.dialects.bigquery.util.BigQueryDatasetFixture.BigQueryTable;
 import com.exasol.adapter.dialects.bigquery.util.IntegrationTestSetup;
+import com.exasol.adapter.dialects.bigquery.util.TestConfig;
 import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
 import com.exasol.matcher.ResultSetStructureMatcher;
 import com.google.cloud.bigquery.*;
 
 @Tag("integration")
 class BigQueryVirtualSchemaIT {
+    private static final TestConfig CONFIG = TestConfig.read();
+    private static IntegrationTestSetup setup;
 
-    private static final IntegrationTestSetup SETUP = IntegrationTestSetup.create();
+    @BeforeAll
+    static void beforeAll() {
+        assumeTrue(CONFIG.hasGoogleCloudCredentials(), "Local bigquery emulator not yet supported");
+        setup = IntegrationTestSetup.create(CONFIG);
+    }
 
     @AfterAll
     static void afterAll() throws Exception {
-        SETUP.close();
+        if (setup != null) {
+            setup.close();
+        }
     }
 
     @AfterEach
     void after() {
-        SETUP.dropCreatedObjects();
+        setup.dropCreatedObjects();
     }
 
     List<DataTypeTestCase> createDataTypes() {
@@ -45,14 +55,14 @@ class BigQueryVirtualSchemaIT {
             t.field = Field.of("col_" + t.bigQueryType, t.bigQueryType);
             return t.field;
         }).collect(toList());
-        final BigQueryTable table = SETUP.bigQueryDataset().createTable(Schema.of(fields));
+        final BigQueryTable table = setup.bigQueryDataset().createTable(Schema.of(fields));
         table.insertRow(
                 tests.stream().collect(toMap(DataTypeTestCase::getColumnName, DataTypeTestCase::getBigQueryValue)));
-        final VirtualSchema virtualSchema = SETUP.createVirtualSchema("myvs");
+        final VirtualSchema virtualSchema = setup.createVirtualSchema("myvs");
 
         return tests.stream().map(test -> DynamicTest.dynamicTest(
                 "BigQuery data type " + test.bigQueryType + " mapped to " + test.expectedExasolType, () -> {
-                    final ResultSet result = SETUP.getStatement().executeQuery(
+                    final ResultSet result = setup.getStatement().executeQuery(
                             "SELECT \"" + test.getColumnName() + "\" from " + table.getQualifiedName(virtualSchema));
                     assertThat(result, ResultSetStructureMatcher.table(test.expectedExasolType)
                             .row(test.expectedExasolValue).matches());
