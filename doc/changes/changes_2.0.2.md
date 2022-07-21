@@ -1,12 +1,19 @@
 # Virtual Schema for BigQuery 2.0.2, released 2022-??-??
 
-Code name:
+Code name: Fix data type conversion
 
 ## Summary
 
-## Features
+This release fixes conversions of the following data types: DATE, ...
 
-* ISSUE_NUMBER: description
+It also fixes the following vulnerabilities by updating dependencies:
+
+* CVE-2022-24823
+* [sonatype-2021-0818](https://ossindex.sonatype.org/vulnerability/sonatype-2021-0818)
+
+## Bugfixes
+
+* #7: Fixed conversion of BigQuery data types DATE, ....
 
 ## Dependency Updates
 

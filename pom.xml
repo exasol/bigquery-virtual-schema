@@ -115,6 +115,20 @@
             <version>2.13.8</version>
             <scope>test</scope>
         </dependency>
+        <!-- Upgade transitive dependency of google-cloud-bigquery to fix CVE-2022-24823 -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
+            <version>4.1.79.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Upgrade transtivie dependency of com.google.cloud:google-cloud-bigquery to fix https://ossindex.sonatype.org/vulnerability/sonatype-2021-0818 -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-core</artifactId>
+            <version>1.48.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -146,6 +160,28 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.sonatype.ossindex.maven</groupId>
+                <artifactId>ossindex-maven-plugin</artifactId>
+                <configuration>
+                    <excludeVulnerabilityIds>
+                        <!-- Transitive test dependency io.netty:netty-handler:4.1.77 used by software.amazon.awssdk:cloudformation -->
+                        <!-- We are not affected, see https://github.com/aws/aws-sdk-java-v2/issues/3263 for details -->
+                        <exclude>sonatype-2020-0026</exclude>
+
+                        <!-- Transitive test dependency io.grpc:grpc-core:jar:1.48.0 used by com.google.cloud:google-cloud-bigquery -->
+                        <!-- https://ossindex.sonatype.org/vulnerability/sonatype-2020-0926: Creation of Temporary File in Directory with Incorrect Permissions-->
+                        <!-- This is only used in tests, production code is not affected. -->
+                        <exclude>sonatype-2020-0926</exclude>
+
+                        <!-- Transitive test dependency io.grpc:grpc-core:jar:1.48.0 used by com.google.cloud:google-cloud-bigquery -->
+                        <!-- https://ossindex.sonatype.org/vulnerability/sonatype-2021-0818: Improper Resource Shutdown or Release -->
+                        <!-- This is only used in tests, production code is not affected. -->
+                        <exclude>sonatype-2021-0818</exclude>
+                    </excludeVulnerabilityIds>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
     <url>https://github.com/exasol/bigquery-virtual-schema/</url>
