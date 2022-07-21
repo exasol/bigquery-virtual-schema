@@ -1,82 +1,34 @@
 package com.exasol.adapter.dialects.bigquery;
 
-import java.nio.file.Path;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.nio.file.Paths;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.*;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.exasol.adapter.dialects.bigquery.testcontainer.BigQueryEmulatorContainer;
-import com.exasol.adapter.dialects.bigquery.util.BucketFsFolder;
-import com.exasol.adapter.dialects.bigquery.util.JdbcDriver;
-import com.exasol.adapter.dialects.bigquery.util.zip.ZipDownloader;
 import com.exasol.bucketfs.BucketAccessException;
+import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
+import com.exasol.matcher.ResultSetStructureMatcher;
 import com.google.cloud.bigquery.*;
 
 @Tag("integration")
-@Testcontainers
 class BigQueryVirtualSchemaIT {
 
     private static final Logger LOGGER = Logger.getLogger(BigQueryVirtualSchemaIT.class.getName());
-    private static final IntegrationTestSetup EXASOL = new IntegrationTestSetup();
-    static final JdbcDriver JDBC_DRIVER = new JdbcDriver() //
-            .withSourceUrl("https://storage.googleapis.com/simba-bq-release/jdbc/" //
-                    + "SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029.zip") //
-            .withLocalFolder("target");
-
-    @Container
-    static BigQueryEmulatorContainer bigQuery = new BigQueryEmulatorContainer(
-            Paths.get("src/test/resources/bigquery-data.yaml"));
+    private static final IntegrationTestSetup TEST_SETUP = IntegrationTestSetup
+            .create(Paths.get("src/test/resources/bigquery-data.yaml"));
 
     @BeforeAll
     static void beforeAll() throws Exception {
-        setupExasolContainer();
-    }
-
-    private static void setupExasolContainer() throws Exception {
-        final ZipDownloader monolithic = ZipDownloader.monolithic( //
-                JDBC_DRIVER.getDownloadUrl(), JDBC_DRIVER.getLocalCopy());
-        final ZipDownloader extracting = ZipDownloader.extracting( //
-                JDBC_DRIVER.getDownloadUrl(), JDBC_DRIVER.getLocalCopy());
-
-        if (!extracting.localCopyExists()) {
-            extracting.download();
-        }
-
-        if (!monolithic.localCopyExists()) {
-            monolithic.download();
-        }
-
-        final BucketFsFolder bucketFs = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
-        // ensure there is no file with name we want to use for folder
-        bucketFs.deleteFile();
-        new BucketFsFolder(EXASOL.getDefaultBucket(), "SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029.zip")
-                .deleteFile();
-
-//        EXASOL.getDefaultBucket().uploadFile(monolithic.getLocalCopy(), monolithic.getFilename());
-        EXASOL.getDefaultBucket().uploadFile(monolithic.getLocalCopy(), "extracted/" + monolithic.getFilename());
-
-        for (final Path file : extracting.inventory("*.jar")) {
-            final String target = JDBC_DRIVER.getPathInBucketFs(file);
-            if (bucketFs.contains(file)) {
-                LOGGER.fine("File already available in bucketfs: " + target);
-            } else {
-                LOGGER.fine("Uploading to bucketfs: " + target);
-                EXASOL.getDefaultBucket().uploadFile(file, target);
-            }
-        }
     }
 
     @Test
-    void test() throws BucketAccessException {
-        BucketFsFolder inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), JDBC_DRIVER.getBucketFsFolder());
-        inventory.fullPaths().forEach(f -> System.out.println("- " + f));
-        inventory = new BucketFsFolder(EXASOL.getDefaultBucket(), "extracted");
-        inventory.fullPaths().forEach(f -> System.out.println("- " + f));
+    void test() throws BucketAccessException, JobException, InterruptedException {
 
-        final BigQuery client = bigQuery.getClient();
+        final BigQuery client = TEST_SETUP.getBigQueryClient();
         TableResult result = client.query(QueryJobConfiguration.of("select 2 * 3"));
         result.iterateAll().forEach(row -> System.out.println("row: " + row));
 
@@ -101,5 +53,21 @@ class BigQueryVirtualSchemaIT {
         // result = client.query(QueryJobConfiguration.of("select * from " + datasetId.getDataset() + ".newtable"));
         result = client.query(QueryJobConfiguration.of("select * from dataset1.table_a"));
         result.iterateAll().forEach(row -> System.out.println("row: " + row));
+    }
+
+    @Test
+    void createVirtualSchema() throws SQLException {
+        final VirtualSchema virtualSchema = TEST_SETUP.createVirtualSchema("myvs");
+        final ResultSet result = TEST_SETUP.getStatement()
+                .executeQuery("SELECT * from " + virtualSchema.getName() + ".table_a");
+        assertThat(result, ResultSetStructureMatcher.table().row("book-1").row("book-2").matches());
+    }
+
+    @Test
+    void getTables() throws SQLException {
+        final ResultSet tables = TEST_SETUP.getConnection().getMetaData().getTables(null, null, null, null);
+        while (tables.next()) {
+            System.out.println(tables.getString(1));
+        }
     }
 }

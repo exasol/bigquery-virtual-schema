@@ -2,16 +2,19 @@ package com.exasol.adapter.dialects.bigquery.testcontainer;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.logging.Logger;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
+import com.exasol.adapter.dialects.bigquery.IntegrationTestSetup;
+import com.exasol.exasoltestsetup.ServiceAddress;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 
 public class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContainer> {
-
+    private static final Logger LOGGER = Logger.getLogger(IntegrationTestSetup.class.getName());
     private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse("ghcr.io/goccy/bigquery-emulator");
     private static final int PORT = 9050;
     private static final String PROJECT_ID = "test";
@@ -38,29 +41,24 @@ public class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulator
         return PROJECT_ID;
     }
 
-    private int getEmulatorPort() {
-        return getMappedPort(PORT);
-    }
-
-    public String getBigQueryJdbcUrl() {
-        final String url = getUrl();
-        return "jdbc:bigquery://" + url + ";ProjectId=" + getProjectId() //
-                + ";RootURL=" + url //
-                + ";OAuthType=2;OAuthAccessToken=a25c7cfd36214f94a79d" //
-                + ";MaxResults=1000;MetaDataFetchThreadCount=32";
-    }
-
     private String getUrl() {
-        return "http://" + getHost() + ":" + getEmulatorPort();
-        // return "http://localhost:9050";
+        return "http://" + getServiceAddress();
     }
 
     public BigQuery getClient() {
-        return BigQueryOptions.newBuilder().setHost(getUrl()).setProjectId(getProjectId()).build().getService();
+        final String url = getUrl();
+        final String projectId = getProjectId();
+        LOGGER.fine("Connecting to bigquery at " + url + " with project id '" + projectId + "'");
+        return BigQueryOptions.newBuilder().setHost(url).setProjectId(projectId).build().getService();
     }
 
     @Override
     public void close() {
 
+    }
+
+    public ServiceAddress getServiceAddress() {
+        // return new ServiceAddress(getHost(), getMappedPort(PORT));
+        return new ServiceAddress("localhost", PORT);
     }
 }

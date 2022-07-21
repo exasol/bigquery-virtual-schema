@@ -11,8 +11,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import lombok.Getter;
-
 /**
  * Download zip archive from URL, support direct extract from stream
  */
@@ -38,11 +36,10 @@ public class ZipDownloader {
     }
 
     private static final Logger LOGGER = Logger.getLogger(ZipDownloader.class.getName());
-//    private static final Pattern FILENAME = Pattern.compile("([^/]*)$");
+    // private static final Pattern FILENAME = Pattern.compile("([^/]*)$");
 
     private final Mode mode;
     private final String downloadUrl;
-    @Getter
     private final String filename;
     private final Path localCopy;
 
@@ -73,22 +70,22 @@ public class ZipDownloader {
                 .map(this.localCopy::resolve);
     }
 
-//    public Stream<Path> pathStreamFromZipArchive(final PathMatcher matcher) throws IOException {
-//        return new ZipInventory().entries(this.localCopy) //
-//                .stream() //
-//                .map(this.localCopy::resolve);
-//    }
-//
-//    public Stream<Path> pathStreamFromFileSystem(final PathMatcher matcher) throws IOException {
-//        return Files.list(this.localCopy);
-//    }
-//
-//    public List<Path> inventoryFromFilesystem(final String globPattern) throws IOException {
-//        final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
-//        return Files.list(this.localCopy) //
-//                .filter(p -> matcher.matches(p.getFileName())) //
-//                .collect(Collectors.toList());
-//    }
+    // public Stream<Path> pathStreamFromZipArchive(final PathMatcher matcher) throws IOException {
+    // return new ZipInventory().entries(this.localCopy) //
+    // .stream() //
+    // .map(this.localCopy::resolve);
+    // }
+    //
+    // public Stream<Path> pathStreamFromFileSystem(final PathMatcher matcher) throws IOException {
+    // return Files.list(this.localCopy);
+    // }
+    //
+    // public List<Path> inventoryFromFilesystem(final String globPattern) throws IOException {
+    // final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
+    // return Files.list(this.localCopy) //
+    // .filter(p -> matcher.matches(p.getFileName())) //
+    // .collect(Collectors.toList());
+    // }
 
     public boolean localCopyExists() {
         return Files.exists(this.localCopy);
@@ -96,6 +93,10 @@ public class ZipDownloader {
 
     public Path getLocalCopy() {
         return this.localCopy;
+    }
+
+    public String getFilename() {
+        return filename;
     }
 
     public void download() throws IOException, URISyntaxException {

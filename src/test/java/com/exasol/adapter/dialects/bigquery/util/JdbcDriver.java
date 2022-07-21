@@ -5,16 +5,13 @@ import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.Getter;
-
 public class JdbcDriver {
 
     private static final Pattern FILENAME = Pattern.compile("([^/]*)\\.[^.]*$");
-//    private static final Pattern FILENAME_WITH_EXTENSION = Pattern.compile("([^/]*)$");
+    // private static final Pattern FILENAME_WITH_EXTENSION = Pattern.compile("([^/]*)$");
 
     private String sourceUrl;
     private String filename;
-    @Getter
     private Path localFolder;
 
     public JdbcDriver withSourceUrl(final String value) {
@@ -24,13 +21,17 @@ public class JdbcDriver {
             throw new RuntimeException("Could not find filename without extension in URL '" + value + "'");
         }
         this.filename = matcher.group(1);
-//        //
-//        matcher = FILENAME_WITH_EXTENSION.matcher(value);
-//        if (!matcher.find()) {
-//            throw new RuntimeException("Could not find filename with extension in URL '" + value + "'");
-//        }
-//        this.filenameWithExtension = matcher.group(1);
+        // //
+        // matcher = FILENAME_WITH_EXTENSION.matcher(value);
+        // if (!matcher.find()) {
+        // throw new RuntimeException("Could not find filename with extension in URL '" + value + "'");
+        // }
+        // this.filenameWithExtension = matcher.group(1);
         return this;
+    }
+
+    public Path getLocalFolder() {
+        return localFolder;
     }
 
     public JdbcDriver withLocalFolder(final String value) {
