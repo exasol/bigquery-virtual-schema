@@ -1,4 +1,4 @@
-package com.exasol.adapter.dialects.bigquery.testcontainer;
+package com.exasol.adapter.dialects.bigquery.util;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -8,24 +8,24 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
-import com.exasol.adapter.dialects.bigquery.IntegrationTestSetup;
+import com.exasol.bucketfs.Bucket;
 import com.exasol.exasoltestsetup.ServiceAddress;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 
-public class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContainer> {
+class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContainer> implements BigQueryTestSetup {
     private static final Logger LOGGER = Logger.getLogger(IntegrationTestSetup.class.getName());
     private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse("ghcr.io/goccy/bigquery-emulator");
     private static final int PORT = 9050;
     private static final String PROJECT_ID = "test";
     private Path dataYaml;
 
-    public BigQueryEmulatorContainer(final Path dataYaml) {
+    BigQueryEmulatorContainer(final Path dataYaml) {
         this(DEFAULT_IMAGE_NAME);
         this.dataYaml = dataYaml;
     }
 
-    public BigQueryEmulatorContainer(final DockerImageName dockerImageName) {
+    BigQueryEmulatorContainer(final DockerImageName dockerImageName) {
         super(dockerImageName);
         dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
         withExposedPorts(PORT);
@@ -37,6 +37,7 @@ public class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulator
         withReuse(false);
     }
 
+    @Override
     public String getProjectId() {
         return PROJECT_ID;
     }
@@ -45,6 +46,7 @@ public class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulator
         return "http://" + getServiceAddress();
     }
 
+    @Override
     public BigQuery getClient() {
         final String url = getUrl();
         final String projectId = getProjectId();
@@ -53,12 +55,21 @@ public class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulator
     }
 
     @Override
-    public void close() {
-
+    public ServiceAddress getServiceAddress() {
+        return new ServiceAddress(getHost(), getMappedPort(PORT));
     }
 
-    public ServiceAddress getServiceAddress() {
-        // return new ServiceAddress(getHost(), getMappedPort(PORT));
-        return new ServiceAddress("localhost", PORT);
+    @Override
+    public String getJdbcUrl(final Bucket bucket, final ServiceAddress serviceAddress) {
+        final String hostAndPort = serviceAddress.toString();
+        final String url = "http://" + hostAndPort;
+        return "jdbc:bigquery://" + url + ";ProjectId=" + getProjectId() //
+                + ";RootURL=" + url //
+                + ";OAuthType=2;OAuthAccessToken=dummy-token";
+    }
+
+    @Override
+    public void close() {
+        this.stop();
     }
 }

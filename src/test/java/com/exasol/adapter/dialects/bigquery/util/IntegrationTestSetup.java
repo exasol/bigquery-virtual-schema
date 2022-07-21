@@ -1,4 +1,4 @@
-package com.exasol.adapter.dialects.bigquery;
+package com.exasol.adapter.dialects.bigquery.util;
 
 import static java.util.stream.Collectors.toList;
 
@@ -13,9 +13,6 @@ import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.exasol.adapter.dialects.bigquery.testcontainer.BigQueryEmulatorContainer;
-import com.exasol.adapter.dialects.bigquery.util.BucketFsFolder;
-import com.exasol.adapter.dialects.bigquery.util.JdbcDriver;
 import com.exasol.adapter.dialects.bigquery.util.zip.ZipDownloader;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
@@ -27,30 +24,30 @@ import com.google.cloud.bigquery.BigQuery;
 
 public class IntegrationTestSetup implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(IntegrationTestSetup.class.getName());
-    private static final String BUCKETFS_ROOT_PATH = "/buckets/bfsdefault/default/";
-
     private static final String ADAPTER_JAR = "virtual-schema-dist-9.0.5-bigquery-2.0.2.jar";
+    public static final String BUCKETFS_ROOT_PATH = "/buckets/bfsdefault/default/";
     public static final Path ADAPTER_JAR_LOCAL_PATH = Path.of("target", ADAPTER_JAR);
-    private final ExasolTestSetup exasolTestSetup = new ExasolTestSetupFactory(
-            Path.of("cloudSetup/generated/testConfig.json")).getTestSetup();
 
-    private final BigQueryEmulatorContainer bigQueryContainer;
+    private final BigQueryTestSetup bigQueryTestSetup;
+    private final ExasolTestSetup exasolTestSetup;
     private final Connection connection;
     private final Statement statement;
     private final ExasolObjectFactory exasolObjectFactory;
     private final AdapterScript adapterScript;
     private final ConnectionDefinition connectionDefinition;
-    private final Bucket bucket;
     private final List<DatabaseObject> createdObjects = new LinkedList<>();
     private final UdfTestSetup udfTestSetup;
+    private final BigQueryDatasetFixture bigQueryDataset;
 
-    private IntegrationTestSetup(final BigQueryEmulatorContainer bigQueryContainer)
+    private IntegrationTestSetup(final BigQueryTestSetup bigQueryTestSetup, final ExasolTestSetup exasolTestSetup)
             throws SQLException, BucketAccessException, TimeoutException, IOException, URISyntaxException {
-        this.bigQueryContainer = bigQueryContainer;
+        this.bigQueryTestSetup = bigQueryTestSetup;
+        this.bigQueryDataset = BigQueryDatasetFixture.create(bigQueryTestSetup.getClient(),
+                bigQueryTestSetup.getProjectId());
+        this.exasolTestSetup = exasolTestSetup;
         this.connection = this.exasolTestSetup.createConnection();
         this.statement = this.connection.createStatement();
         this.statement.executeUpdate("ALTER SESSION SET QUERY_CACHE = 'OFF';");
-        this.bucket = this.exasolTestSetup.getDefaultBucket();
         this.udfTestSetup = new UdfTestSetup(this.exasolTestSetup, this.connection);
         final List<String> jvmOptions = new ArrayList<>(Arrays.asList(this.udfTestSetup.getJvmOptions()));
         this.exasolObjectFactory = new ExasolObjectFactory(this.connection,
@@ -60,13 +57,27 @@ public class IntegrationTestSetup implements AutoCloseable {
         this.adapterScript = createAdapterScript(adapterSchema);
     }
 
-    public static IntegrationTestSetup create(final Path bigQueryDataYaml) {
-        final BigQueryEmulatorContainer bigQueryContainer = new BigQueryEmulatorContainer(bigQueryDataYaml);
-        bigQueryContainer.start();
+    public static IntegrationTestSetup create() {
+        final BigQueryTestSetup bigQueryTestSetup = createBigQueryTestSetup();
+        bigQueryTestSetup.start();
         try {
-            return new IntegrationTestSetup(bigQueryContainer);
+            final ExasolTestSetup exasolTestSetup = new ExasolTestSetupFactory(
+                    Path.of("cloudSetup/generated/testConfig.json")).getTestSetup();
+            final IntegrationTestSetup setup = new IntegrationTestSetup(bigQueryTestSetup, exasolTestSetup);
+            return setup;
         } catch (SQLException | BucketAccessException | TimeoutException | IOException | URISyntaxException exception) {
             throw new IllegalStateException("Failed to create test setup: " + exception.getMessage(), exception);
+        }
+    }
+
+    private static BigQueryTestSetup createBigQueryTestSetup() {
+        final TestConfig config = TestConfig.read();
+        if (config.hasGoogleCloudCredentials()) {
+            LOGGER.info("Using Google Cloud BigQuery setup");
+            return BigQueryTestSetup.createGoogleCloudSetup(config);
+        } else {
+            LOGGER.info("Using local BigQuery setup");
+            return BigQueryTestSetup.createLocalSetup();
         }
     }
 
@@ -76,19 +87,15 @@ public class IntegrationTestSetup implements AutoCloseable {
     }
 
     public ConnectionDefinition createConnectionDefinition() {
-        final String hostAndPort = this.exasolTestSetup
-                .makeTcpServiceAccessibleFromDatabase(bigQueryContainer.getServiceAddress()).toString();
-        final String url = "http://" + hostAndPort;
-        final String jdbcUrl = "jdbc:bigquery://" + url + ";ProjectId=" + bigQueryContainer.getProjectId() //
-                + ";RootURL=" + url //
-                + ";OAuthType=2;OAuthAccessToken=a25c7cfd36214f94a79d" //
-                + ";MaxResults=1000;MetaDataFetchThreadCount=32";
-        return this.exasolObjectFactory.createConnectionDefinition("BIGQUERY_CONNECTION", jdbcUrl, "", "");
+        final ServiceAddress bigQueryServiceAddress = this.exasolTestSetup
+                .makeTcpServiceAccessibleFromDatabase(bigQueryTestSetup.getServiceAddress());
+        return this.exasolObjectFactory.createConnectionDefinition("BIGQUERY_CONNECTION",
+                bigQueryTestSetup.getJdbcUrl(getBucket(), bigQueryServiceAddress), "", "");
     }
 
     AdapterScript createAdapterScript(final ExasolSchema adapterSchema)
             throws BucketAccessException, TimeoutException, IOException, URISyntaxException {
-        this.bucket.uploadFile(ADAPTER_JAR_LOCAL_PATH, ADAPTER_JAR);
+        getBucket().uploadFile(ADAPTER_JAR_LOCAL_PATH, ADAPTER_JAR);
         return adapterSchema.createAdapterScriptBuilder("ADAPTER_SCRIPT_BIGQUERY")
                 .bucketFsContent("com.exasol.adapter.RequestDispatcher", getAdapterJarsInBucketFs())
                 .language(AdapterScript.Language.JAVA).build();
@@ -135,20 +142,22 @@ public class IntegrationTestSetup implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        this.bigQueryContainer.stop();
+        this.bigQueryDataset.close();
+        this.bigQueryTestSetup.close();
         this.udfTestSetup.close();
         this.statement.close();
         this.connection.close();
         this.exasolTestSetup.close();
     }
 
-    protected VirtualSchema createVirtualSchema(final String schemaName) {
+    public VirtualSchema createVirtualSchema(final String schemaName) {
         return createVirtualSchema(schemaName, this.connectionDefinition);
     }
 
     protected VirtualSchema createVirtualSchema(final String schemaName, final ConnectionDefinition connection) {
         final VirtualSchema virtualSchema = getPreconfiguredVirtualSchemaBuilder(schemaName)
-                .connectionDefinition(connection)//
+                .connectionDefinition(connection) //
+                .sourceSchemaName(this.bigQueryDataset.getDatasetId().getDataset()) //
                 .properties(getVirtualSchemaProperties()).build();
         this.createdObjects.add(virtualSchema);
         return virtualSchema;
@@ -157,6 +166,7 @@ public class IntegrationTestSetup implements AutoCloseable {
     @NotNull
     private Map<String, String> getVirtualSchemaProperties() {
         final Map<String, String> properties = new HashMap<>();
+        properties.put("CATALOG_NAME", this.bigQueryDataset.getDatasetId().getProject());
         final String debugProperty = System.getProperty("test.debug", "");
         final String profileProperty = System.getProperty("test.jprofiler", "");
         if (!debugProperty.isBlank() || !profileProperty.isBlank()) {
@@ -174,6 +184,7 @@ public class IntegrationTestSetup implements AutoCloseable {
             createdObject.drop();
         }
         this.createdObjects.clear();
+        this.bigQueryDataset.dropCreatedObjects();
     }
 
     public Connection getConnection() {
@@ -185,11 +196,11 @@ public class IntegrationTestSetup implements AutoCloseable {
     }
 
     public Bucket getBucket() {
-        return this.bucket;
+        return this.exasolTestSetup.getDefaultBucket();
     }
 
     public BigQuery getBigQueryClient() {
-        return this.bigQueryContainer.getClient();
+        return this.bigQueryTestSetup.getClient();
     }
 
     public ExasolObjectFactory getExasolObjectFactory() {
@@ -199,5 +210,9 @@ public class IntegrationTestSetup implements AutoCloseable {
     public VirtualSchema.Builder getPreconfiguredVirtualSchemaBuilder(final String schemaName) {
         return this.exasolObjectFactory.createVirtualSchemaBuilder(schemaName)
                 .connectionDefinition(this.connectionDefinition).adapterScript(this.adapterScript);
+    }
+
+    public BigQueryDatasetFixture bigQueryDataset() {
+        return this.bigQueryDataset;
     }
 }

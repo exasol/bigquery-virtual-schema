@@ -1,16 +1,17 @@
 package com.exasol.adapter.dialects.bigquery;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.nio.file.Paths;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
 
-import com.exasol.adapter.dialects.bigquery.util.zip.ZipDownloader;
-import com.exasol.bucketfs.BucketAccessException;
+import com.exasol.adapter.dialects.bigquery.util.BigQueryDatasetFixture.BigQueryTable;
+import com.exasol.adapter.dialects.bigquery.util.IntegrationTestSetup;
 import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
 import com.exasol.matcher.ResultSetStructureMatcher;
 import com.google.cloud.bigquery.*;
@@ -18,72 +19,67 @@ import com.google.cloud.bigquery.*;
 @Tag("integration")
 class BigQueryVirtualSchemaIT {
 
-    private static final Logger LOGGER = Logger.getLogger(BigQueryVirtualSchemaIT.class.getName());
-    private static final IntegrationTestSetup TEST_SETUP = IntegrationTestSetup
-            .create(Paths.get("src/test/resources/bigquery-data.yaml"));
+    private static final IntegrationTestSetup SETUP = IntegrationTestSetup.create();
 
-    @BeforeAll
-    static void beforeAll() throws Exception {
+    @AfterAll
+    static void afterAll() throws Exception {
+        SETUP.close();
     }
 
-    private static void setupExasolContainer() throws Exception {
-        final ZipDownloader monolithic = ZipDownloader.monolithic( //
-                JDBC_DRIVER.getDownloadUrl(), JDBC_DRIVER.getLocalCopy());
-        if (EXASOL.getDefaultBucket().listContents().contains(monolithic.getFilename())) {
-            return;
+    @AfterEach
+    void after() {
+        SETUP.dropCreatedObjects();
+    }
+
+    List<DataTypeTestCase> createDataTypes() {
+        return List.of(new DataTypeTestCase(StandardSQLTypeName.STRING, "val", "VARCHAR", "val"), //
+                new DataTypeTestCase(StandardSQLTypeName.BIGNUMERIC, 42, "VARCHAR", 42),
+                new DataTypeTestCase(StandardSQLTypeName.BOOL, true, "BOOLEAN", true),
+                new DataTypeTestCase(StandardSQLTypeName.DATE, "2022-03-15", "DATE", "2022-03-15"));
+    }
+
+    @TestFactory
+    Stream<DynamicNode> dataTypeConversion() {
+        final List<DataTypeTestCase> tests = createDataTypes();
+        final List<Field> fields = tests.stream().map(t -> {
+            t.field = Field.of("col_" + t.bigQueryType, t.bigQueryType);
+            return t.field;
+        }).collect(toList());
+        final BigQueryTable table = SETUP.bigQueryDataset().createTable(Schema.of(fields));
+        table.insertRow(
+                tests.stream().collect(toMap(DataTypeTestCase::getColumnName, DataTypeTestCase::getBigQueryValue)));
+        final VirtualSchema virtualSchema = SETUP.createVirtualSchema("myvs");
+
+        return tests.stream().map(test -> DynamicTest.dynamicTest(
+                "BigQuery data type " + test.bigQueryType + " mapped to " + test.expectedExasolType, () -> {
+                    final ResultSet result = SETUP.getStatement().executeQuery(
+                            "SELECT \"" + test.getColumnName() + "\" from " + table.getQualifiedName(virtualSchema));
+                    assertThat(result, ResultSetStructureMatcher.table(test.expectedExasolType)
+                            .row(test.expectedExasolValue).matches());
+                }));
+    }
+
+    static class DataTypeTestCase {
+        Field field;
+        final StandardSQLTypeName bigQueryType;
+        final Object bigQueryValue;
+        final String expectedExasolType;
+        final Object expectedExasolValue;
+
+        DataTypeTestCase(final StandardSQLTypeName bigQueryType, final Object bigQueryValue,
+                final String expectedExasolType, final Object expectedExasolValue) {
+            this.bigQueryType = bigQueryType;
+            this.bigQueryValue = bigQueryValue;
+            this.expectedExasolType = expectedExasolType;
+            this.expectedExasolValue = expectedExasolValue;
         }
-        if (!monolithic.localCopyExists()) {
-            monolithic.download();
+
+        String getColumnName() {
+            return field.getName();
         }
-        EXASOL.getDefaultBucket().uploadFile(monolithic.getLocalCopy(), "/");
-    }
 
-    /**
-     * See https://intranet.srv.exasol.com/display/InTeam/BucketFS+-+Uploading+zip+archives
-     */
-    @Test
-    void test() throws BucketAccessException, JobException, InterruptedException {
-
-        final BigQuery client = TEST_SETUP.getBigQueryClient();
-        TableResult result = client.query(QueryJobConfiguration.of("select 2 * 3"));
-        result.iterateAll().forEach(row -> System.out.println("row: " + row));
-
-        final DatasetId datasetId = DatasetId.of("mydatasetId" + System.currentTimeMillis());
-
-        client.create(DatasetInfo.newBuilder(datasetId).build());
-
-        final TableId tableId = TableId.of(datasetId.getDataset(), "tableName");
-        final Schema schema = Schema.of(Field.of("id", StandardSQLTypeName.STRING),
-                Field.of("name", StandardSQLTypeName.STRING), Field.of("status", StandardSQLTypeName.BOOL));
-        final TableDefinition tableDefinition = StandardTableDefinition.of(schema);
-        final TableInfo tableInfo = TableInfo.newBuilder(tableId, tableDefinition).build();
-
-        // client.create(tableInfo);
-
-        // client.insertAll(InsertAllRequest.of(tableId, RowToInsert.of(Map.of("id", 1, "name", "a", "status", true))));
-
-        // result = client.query(QueryJobConfiguration.of("select * from " + tableId.toString()));
-        // result = client.query(QueryJobConfiguration.of("CREATE TABLE " + datasetId.getDataset() + ".newtable ("
-        // + "x INT64," + "y STRUCT<" + "a ARRAY<STRING> ," + "b BOOL" + ">)"));
-        // result = client.query(QueryJobConfiguration.of("INSERT `table` (col1) VALUES (42)"));
-        // result = client.query(QueryJobConfiguration.of("select * from " + datasetId.getDataset() + ".newtable"));
-        result = client.query(QueryJobConfiguration.of("select * from dataset1.table_a"));
-        result.iterateAll().forEach(row -> System.out.println("row: " + row));
-    }
-
-    @Test
-    void createVirtualSchema() throws SQLException {
-        final VirtualSchema virtualSchema = TEST_SETUP.createVirtualSchema("myvs");
-        final ResultSet result = TEST_SETUP.getStatement()
-                .executeQuery("SELECT * from " + virtualSchema.getName() + ".table_a");
-        assertThat(result, ResultSetStructureMatcher.table().row("book-1").row("book-2").matches());
-    }
-
-    @Test
-    void getTables() throws SQLException {
-        final ResultSet tables = TEST_SETUP.getConnection().getMetaData().getTables(null, null, null, null);
-        while (tables.next()) {
-            System.out.println(tables.getString(1));
+        public Object getBigQueryValue() {
+            return bigQueryValue;
         }
     }
 }
