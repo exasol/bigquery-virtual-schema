@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import org.junit.jupiter.api.*;
 
+import com.exasol.adapter.dialects.bigquery.util.zip.ZipDownloader;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
 import com.exasol.matcher.ResultSetStructureMatcher;
@@ -25,6 +26,21 @@ class BigQueryVirtualSchemaIT {
     static void beforeAll() throws Exception {
     }
 
+    private static void setupExasolContainer() throws Exception {
+        final ZipDownloader monolithic = ZipDownloader.monolithic( //
+                JDBC_DRIVER.getDownloadUrl(), JDBC_DRIVER.getLocalCopy());
+        if (EXASOL.getDefaultBucket().listContents().contains(monolithic.getFilename())) {
+            return;
+        }
+        if (!monolithic.localCopyExists()) {
+            monolithic.download();
+        }
+        EXASOL.getDefaultBucket().uploadFile(monolithic.getLocalCopy(), "/");
+    }
+
+    /**
+     * See https://intranet.srv.exasol.com/display/InTeam/BucketFS+-+Uploading+zip+archives
+     */
     @Test
     void test() throws BucketAccessException, JobException, InterruptedException {
 
