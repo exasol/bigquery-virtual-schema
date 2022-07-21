@@ -24,10 +24,13 @@ It also fixes the following vulnerabilities by updating dependencies:
 ### Test Dependency Updates
 
 * Added `com.exasol:exasol-test-setup-abstraction-java:0.3.2`
+* Added `com.exasol:hamcrest-resultset-matcher:1.5.1`
 * Added `com.exasol:test-db-builder-java:3.3.3`
 * Added `com.exasol:udf-debugging-java:0.6.4`
 * Updated `com.exasol:virtual-schema-common-jdbc:9.0.4` to `9.0.5`
 * Added `com.google.cloud:google-cloud-bigquery:2.13.8`
+* Added `io.grpc:grpc-core:1.48.0`
+* Added `io.netty:netty-common:4.1.79.Final`
 * Updated `org.junit.jupiter:junit-jupiter:5.8.1` to `5.8.2`
 * Updated `org.mockito:mockito-junit-jupiter:4.1.0` to `4.6.1`
 * Added `org.testcontainers:jdbc:1.17.3`

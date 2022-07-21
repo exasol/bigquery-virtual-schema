@@ -161,6 +161,15 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <!-- Fix failing integration tests: 
+                        java.lang.module.ResolutionException: Module org.glassfish.jakarta.json contains package jakarta.json.stream, module jakarta.json exports package jakarta.json.stream to org.glassfish.jakarta.json -->
+                    <useModulePath>false</useModulePath>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.sonatype.ossindex.maven</groupId>
                 <artifactId>ossindex-maven-plugin</artifactId>
                 <configuration>
