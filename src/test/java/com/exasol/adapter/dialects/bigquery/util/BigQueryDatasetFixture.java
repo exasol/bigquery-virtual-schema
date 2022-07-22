@@ -1,5 +1,7 @@
 package com.exasol.adapter.dialects.bigquery.util;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -77,7 +79,13 @@ public class BigQueryDatasetFixture implements AutoCloseable {
         }
 
         public void insertRow(final Map<String, ?> content) {
-            client.insertAll(InsertAllRequest.of(tableInfo, RowToInsert.of(content)));
+            final InsertAllResponse response = client
+                    .insertAll(InsertAllRequest.of(tableInfo, RowToInsert.of(content)));
+            final List<String> insertErrors = response.getInsertErrors().values().stream().flatMap(List::stream)
+                    .map(BigQueryError::toString).collect(toList());
+            if (!insertErrors.isEmpty()) {
+                throw new IllegalStateException("Failed to insert row: " + insertErrors);
+            }
         }
 
         public String getQualifiedName(final VirtualSchema virtualSchema) {
