@@ -166,6 +166,7 @@ public class IntegrationTestSetup implements AutoCloseable {
     private Map<String, String> getVirtualSchemaProperties() {
         final Map<String, String> properties = new HashMap<>();
         properties.put("CATALOG_NAME", this.bigQueryDataset.getDatasetId().getProject());
+        properties.put("LOG_LEVEL", "ALL");
         final String debugProperty = System.getProperty("test.debug", "");
         final String profileProperty = System.getProperty("test.jprofiler", "");
         if (!debugProperty.isBlank() || !profileProperty.isBlank()) {
@@ -173,7 +174,6 @@ public class IntegrationTestSetup implements AutoCloseable {
         }
         if (System.getProperty("test.vs-logs", "false").equals("true")) {
             properties.put("DEBUG_ADDRESS", "127.0.0.1:3001");
-            properties.put("LOG_LEVEL", "ALL");
         }
         return properties;
     }
