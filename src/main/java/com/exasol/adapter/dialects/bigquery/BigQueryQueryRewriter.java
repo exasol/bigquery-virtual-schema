@@ -1,5 +1,12 @@
 package com.exasol.adapter.dialects.bigquery;
 
+import java.math.BigInteger;
+import java.sql.*;
+import java.util.StringJoiner;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
@@ -11,23 +18,17 @@ import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
 import com.exasol.adapter.sql.SqlStatement;
 
-import java.math.BigInteger;
-import java.sql.*;
-import java.util.StringJoiner;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * This class implements a BigQuery-specific query rewriter.
  */
 public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
-    private static final double[] TEN_POWERS = {10d, 100d, 1000d, 10000d, 100000d, 1000000d};
+    private static final double[] TEN_POWERS = { 10d, 100d, 1000d, 10000d, 100000d, 1000000d };
     @SuppressWarnings("squid:S4784") // this pattern is secure
     private static final Pattern DATE_PATTERN = Pattern.compile("(\\d{4})-(\\d{1,2})-(\\d{1,2})");
     @SuppressWarnings("squid:S4784") // this pattern is secure
-    private static final Pattern TIME_PATTERN = Pattern.compile("(\\d{1,2}):(\\d{1,2}):(\\d{1,2})(?:\\.(\\d{1,6}))?");
+    private static final Pattern TIMESTAMP_PATTERN = Pattern
+            .compile("(\\d{4})-(\\d{1,2})-(\\d{1,2})[T\\s](\\d{1,2}):(\\d{1,2}):(\\d{1,2})(?:\\.(\\d{1,6}))?");
     private static final String CAST = "CAST";
     private static final String CAST_NULL_AS_VARCHAR_4 = CAST + " (NULL AS VARCHAR(4))";
 
@@ -39,7 +40,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
      * @param connectionFactory    factory for the JDBC connection to remote data source
      */
     public BigQueryQueryRewriter(final SqlDialect dialect, final RemoteMetadataReader remoteMetadataReader,
-                                 final ConnectionFactory connectionFactory) {
+            final ConnectionFactory connectionFactory) {
         super(dialect, remoteMetadataReader, connectionFactory);
     }
 
@@ -89,26 +90,36 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
         builder.append(") WHERE false");
     }
 
-    private void appendRow(final StringBuilder builder, final ResultSet resultSet,
-            final ResultSetMetaData resultSetMetadata) throws SQLException {
-        final int columnCount = resultSetMetadata.getColumnCount();
+    private void appendRow(final StringBuilder builder, final ResultSet resultSet, final ResultSetMetaData metadata)
+            throws SQLException {
+        final int columnCount = metadata.getColumnCount();
         builder.append(" (");
         for (int i = 1; i <= columnCount; ++i) {
-            final String columnName = resultSetMetadata.getColumnName(i);
+            final String columnName = metadata.getColumnName(i);
             if (i > 1) {
                 builder.append(", ");
             }
-            appendColumnValue(builder, resultSet, columnName, resultSetMetadata.getColumnType(i));
+            appendColumnValue(builder, resultSet, columnName, metadata.getColumnType(i), metadata.getColumnTypeName(i));
         }
         builder.append(")");
     }
 
     private void appendColumnValue(final StringBuilder builder, final ResultSet resultSet, final String columnName,
-            final int type) throws SQLException {
+            final int type, final String typeName) throws SQLException {
+        LOGGER.fine(() -> "Mapping column " + columnName + " of type " + type + "/" + typeName);
+
+        if ("GEOGRAPHY".equals(typeName)) {
+            appendGeometry(builder, resultSet, columnName);
+            return;
+        }
+
         switch (type) {
         case Types.BIGINT:
+        case Types.INTEGER:
             appendBigInt(builder, resultSet, columnName);
             break;
+        case Types.DECIMAL:
+        case Types.NUMERIC:
         case Types.DOUBLE:
             appendDouble(builder, resultSet, columnName);
             break;
@@ -122,12 +133,13 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
             appendTimestamp(builder, resultSet, columnName);
             break;
         case Types.VARCHAR:
+        case Types.CHAR:
             appendVarchar(builder, resultSet, columnName);
             break;
         case Types.TIME:
         case Types.VARBINARY:
-        case Types.NUMERIC:
         default:
+            LOGGER.info(() -> "Mapping unknown column " + columnName + " of type " + type + "/" + typeName);
             appendString(builder, resultSet, columnName);
             break;
         }
@@ -137,6 +149,12 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
             throws SQLException {
         final String stringLiteral = this.dialect.getStringLiteral(resultSet.getString(columnName));
         builder.append(resultSet.wasNull() ? CAST_NULL_AS_VARCHAR_4 : stringLiteral);
+    }
+
+    private void appendGeometry(final StringBuilder builder, final ResultSet resultSet, final String columnName)
+            throws SQLException {
+        final String value = resultSet.wasNull() ? "NULL" : "'" + resultSet.getString(columnName) + "'";
+        builder.append(CAST + " (" + value + " AS GEOMETRY)");
     }
 
     private void appendBigInt(final StringBuilder builder, final ResultSet resultSet, final String columnName)
@@ -161,11 +179,9 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
             throws SQLException {
         final String value = resultSet.getString(columnName);
         if (value == null) {
-            builder.append(CAST_NULL_AS_VARCHAR_4);
+            builder.append(CAST + " (NULL AS DATE)");
         } else {
-            builder.append("'");
             builder.append(castDate(value));
-            builder.append("'");
         }
     }
 
@@ -175,7 +191,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
             final int year = Integer.parseInt(matcher.group(1));
             final int month = Integer.parseInt(matcher.group(2));
             final int day = Integer.parseInt(matcher.group(3));
-            return String.format("%02d.%02d.%04d", day, month, year);
+            return String.format("CAST ('%04d-%02d-%02d' AS DATE)", year, month, day);
         } else {
             throw new IllegalArgumentException(
                     "Date does not match required format: YYYY-[M]M-[D]D. Actual value was:" + dateToCast);
@@ -186,48 +202,37 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
             throws SQLException {
         final String value = resultSet.getString(columnName);
         if (value == null) {
-            builder.append(CAST_NULL_AS_VARCHAR_4);
+            builder.append(CAST + " (NULL AS TIMESTAMP)");
         } else {
-            builder.append("'");
-            builder.append(castTimestamp(value));
-            builder.append("'");
+            builder.append("CAST ('");
+            builder.append(convertTimestampFormat(value));
+            builder.append("' AS TIMESTAMP)");
         }
     }
 
-    private String castTimestamp(final String timestampToCast) {
-        final StringBuilder builder = new StringBuilder();
-        final String[] splitTimestamp = getSplitTimestamp(timestampToCast);
-        builder.append(castDate(splitTimestamp[0]));
-        builder.append(" ");
-        builder.append(castTime(splitTimestamp[1]));
-        return builder.toString();
-    }
-
-    private String[] getSplitTimestamp(final String timestampToCast) {
-        if (timestampToCast.contains("T")) {
-            return timestampToCast.split("T");
-        } else {
-            return timestampToCast.split(" ");
-        }
-    }
-
-    private String castTime(final String timeToCast) {
-        final Matcher matcher = TIME_PATTERN.matcher(timeToCast);
+    private String convertTimestampFormat(final String timestamp) {
+        final Matcher matcher = TIMESTAMP_PATTERN.matcher(timestamp);
         if (matcher.matches()) {
-            final int hour = Integer.parseInt(matcher.group(1));
-            final int minute = Integer.parseInt(matcher.group(2));
-            final int second = Integer.parseInt(matcher.group(3));
-            final String fractionOfSecond = matcher.group(4);
+            final int year = Integer.parseInt(matcher.group(1));
+            final int month = Integer.parseInt(matcher.group(2));
+            final int day = Integer.parseInt(matcher.group(3));
+
+            final int hour = Integer.parseInt(matcher.group(4));
+            final int minute = Integer.parseInt(matcher.group(5));
+            final int second = Integer.parseInt(matcher.group(6));
+            final String fractionOfSecond = matcher.group(7);
             if (fractionOfSecond != null) {
                 final int fractionOfSecondInt = Integer.parseInt(fractionOfSecond);
                 final int fractionOfSecondRounded = (int) Math
                         .round((fractionOfSecondInt / TEN_POWERS[fractionOfSecond.length() - 1]) * 1000);
-                return String.format("%02d:%02d:%02d.%03d", hour, minute, second, fractionOfSecondRounded);
+                return String.format("%04d-%02d-%02d %02d:%02d:%02d.%03d", year, month, day, hour, minute, second,
+                        fractionOfSecondRounded);
             } else {
-                return String.format("%02d:%02d:%02d", hour, minute, second);
+                return String.format("%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second);
             }
         } else {
-            throw new IllegalArgumentException("Time does not match required format: [H]H:[M]M:[S]S[.DDDDDD]]");
+            throw new IllegalArgumentException(
+                    "Timestamp '" + timestamp + "'' does not match required format: " + TIMESTAMP_PATTERN);
         }
     }
 

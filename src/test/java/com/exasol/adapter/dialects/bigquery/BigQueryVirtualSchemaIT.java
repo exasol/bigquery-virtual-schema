@@ -61,9 +61,7 @@ class BigQueryVirtualSchemaIT {
                         timestamp("2022-03-15T15:40:30.123Z")),
                 DataTypeTestCase.of(StandardSQLTypeName.FLOAT64, 3.14, "DOUBLE PRECISION", 3.14D),
                 DataTypeTestCase.of(StandardSQLTypeName.GEOGRAPHY, "POINT(1 4)", "GEOMETRY", "POINT (1 4)"),
-                DataTypeTestCase.of(StandardSQLTypeName.TIME, "14:15:16.123", "VARCHAR", "14:15:16.123")
-
-        );
+                DataTypeTestCase.of(StandardSQLTypeName.TIME, "14:15:16.123", "VARCHAR", "14:15:16.123"));
     }
 
     private static Date date(final String date) {
@@ -116,10 +114,6 @@ class BigQueryVirtualSchemaIT {
         static DataTypeTestCase of(final StandardSQLTypeName bigQueryType, final Object bigQueryValue,
                 final String expectedExasolType, final Object expectedExasolValue) {
             return new DataTypeTestCase(bigQueryType, bigQueryValue, expectedExasolType, expectedExasolValue);
-        }
-
-        static DataTypeTestCase xxofNullValue(final StandardSQLTypeName bigQueryType, final String expectedExasolType) {
-            return of(bigQueryType, null, expectedExasolType, null);
         }
 
         public String getTestName() {

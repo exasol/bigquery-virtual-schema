@@ -6,17 +6,15 @@ import com.exasol.bucketfs.Bucket;
 import com.exasol.exasoltestsetup.ServiceAddress;
 import com.google.cloud.bigquery.BigQuery;
 
-public interface BigQueryTestSetup {
+public interface BigQueryTestSetup extends AutoCloseable {
 
-    public static BigQueryTestSetup createLocalSetup() {
+    static BigQueryTestSetup createLocalSetup() {
         return new BigQueryEmulatorContainer(Paths.get("src/test/resources/bigquery-data.yaml"));
     }
 
-    public static BigQueryTestSetup createGoogleCloudSetup(final TestConfig config) {
+    static BigQueryTestSetup createGoogleCloudSetup(final TestConfig config) {
         return new GoogleCloudBigQuerySetup(config);
     }
-
-    void close();
 
     BigQuery getClient();
 
@@ -27,4 +25,7 @@ public interface BigQueryTestSetup {
     String getJdbcUrl(Bucket bucket, ServiceAddress serviceAddress);
 
     void start();
+
+    @Override
+    void close();
 }

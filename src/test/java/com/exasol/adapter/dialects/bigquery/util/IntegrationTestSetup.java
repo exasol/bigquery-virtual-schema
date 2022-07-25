@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.exasol.adapter.dialects.bigquery.util.zip.JdbcDriverProvider;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.dbbuilder.dialects.DatabaseObject;
@@ -115,19 +114,16 @@ public class IntegrationTestSetup implements AutoCloseable {
     }
 
     public VirtualSchema createVirtualSchema(final String schemaName) {
-        return createVirtualSchema(schemaName, this.connectionDefinition);
-    }
-
-    protected VirtualSchema createVirtualSchema(final String schemaName, final ConnectionDefinition connection) {
-        final VirtualSchema virtualSchema = getPreconfiguredVirtualSchemaBuilder(schemaName)
-                .connectionDefinition(connection) //
+        final VirtualSchema virtualSchema = this.exasolObjectFactory.createVirtualSchemaBuilder(schemaName)
+                .connectionDefinition(this.connectionDefinition) //
+                .adapterScript(this.adapterScript) //
+                .connectionDefinition(this.connectionDefinition) //
                 .sourceSchemaName(this.bigQueryDataset.getDatasetId().getDataset()) //
                 .properties(getVirtualSchemaProperties()).build();
         this.createdObjects.add(virtualSchema);
         return virtualSchema;
     }
 
-    @NotNull
     private Map<String, String> getVirtualSchemaProperties() {
         final Map<String, String> properties = new HashMap<>();
         properties.put("CATALOG_NAME", this.bigQueryDataset.getDatasetId().getProject());
@@ -169,11 +165,6 @@ public class IntegrationTestSetup implements AutoCloseable {
 
     public ExasolObjectFactory getExasolObjectFactory() {
         return this.exasolObjectFactory;
-    }
-
-    public VirtualSchema.Builder getPreconfiguredVirtualSchemaBuilder(final String schemaName) {
-        return this.exasolObjectFactory.createVirtualSchemaBuilder(schemaName)
-                .connectionDefinition(this.connectionDefinition).adapterScript(this.adapterScript);
     }
 
     public BigQueryDatasetFixture bigQueryDataset() {

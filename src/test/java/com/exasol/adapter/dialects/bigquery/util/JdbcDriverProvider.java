@@ -1,4 +1,4 @@
-package com.exasol.adapter.dialects.bigquery.util.zip;
+package com.exasol.adapter.dialects.bigquery.util;
 
 import static java.util.stream.Collectors.toList;
 
@@ -18,17 +18,16 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 
-public class JdbcDriverProvider {
+class JdbcDriverProvider {
     private static final Logger LOGGER = Logger.getLogger(JdbcDriverProvider.class.getName());
-    private static final Pattern URL_FILENAME = Pattern.compile("([^/]*)\\.[^.]*$");
     private static final Pattern FILENAME_WITH_EXTENSION = Pattern.compile("([^/]*)$");
     private final Bucket bucket;
 
-    public JdbcDriverProvider(final Bucket bucket) {
+    JdbcDriverProvider(final Bucket bucket) {
         this.bucket = bucket;
     }
 
-    public List<String> uploadJdbcDriverToBucketFs(final String jdbcDriverUrl) {
+    List<String> uploadJdbcDriverToBucketFs(final String jdbcDriverUrl) {
         final String zipFileName = getFileName(jdbcDriverUrl);
         final Path localFile = Paths.get("target").resolve(zipFileName).toAbsolutePath();
 
@@ -79,7 +78,7 @@ public class JdbcDriverProvider {
         return name.substring(0, name.lastIndexOf("."));
     }
 
-    public void download(final String downloadUrl, final Path localCopy) {
+    private void download(final String downloadUrl, final Path localCopy) {
         if (Files.exists(localCopy)) {
             LOGGER.info("File " + localCopy + " already exists, no need to download it");
             return;
