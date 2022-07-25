@@ -55,6 +55,9 @@ public class IntegrationTestSetup implements AutoCloseable {
     }
 
     public static IntegrationTestSetup create(final TestConfig config) {
+        if (config.isUdfLoggingEnabled()) {
+            System.setProperty("test.udf-logs", "true");
+        }
         final BigQueryTestSetup bigQueryTestSetup = createBigQueryTestSetup(config);
         bigQueryTestSetup.start();
         try {

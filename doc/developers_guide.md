@@ -10,8 +10,12 @@ Integration tests are prepared to use a local [bigquery-emulator](https://github
 2. Create file `test.properties` with the following content:
 
     ```properties
+    googleProjectId = google-project-id
     serviceAccountEmail = your.google.account@example.com
     privateKeyPath = /path/to/private-key.json
-    googleProjectId = google-project-id
+
+    udfLoggingEnabled = true
     ```
     If file `test.properties` or any of it's entries is missing, then integration tests will use the local local bigquery-emulator by default, which as stated before does not support all required features, yet.
+
+    * When `udfLoggingEnabled` is set to `true`, UDF logs will be written to `target/udf-logs/*.txt`.

@@ -62,6 +62,12 @@ public class TestConfig {
         return getMandatoryValue("googleProjectId");
     }
 
+    public boolean isUdfLoggingEnabled() {
+        return getOptionalValue("udfLoggingEnabled") //
+                .filter(v -> v.equalsIgnoreCase("true")) //
+                .isPresent();
+    }
+
     public String getMandatoryValue(final String param) {
         return getOptionalValue(param)
                 .orElseThrow(() -> new IllegalStateException("Property '" + param + "' not found in config file"));
@@ -70,4 +76,5 @@ public class TestConfig {
     public Optional<String> getOptionalValue(final String param) {
         return Optional.ofNullable(this.properties.getProperty(param));
     }
+
 }
