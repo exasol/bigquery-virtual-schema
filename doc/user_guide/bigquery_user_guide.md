@@ -8,13 +8,13 @@ Download the [Simba JDBC Driver for Google BigQuery](https://cloud.google.com/bi
 
 ## Uploading the JDBC Driver to BucketFS
 
-1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm) 
+1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
 1. [Upload the driver to BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm)
 
 **Hint**: Magnitude Simba driver contains a lot of jar files, but you can upload all of them together as an archive (`.tar.gz`, for example).
 The archive will be unpacked automatically in the bucket, and you can access the files using the following path pattern '<your bucket>/<archive's name without extension>/<name of a file form the archive>.jar'
 
-Leave only `.jar` files in the archive. It will help you to generate a list for adapter script later. 
+Leave only `.jar` files in the archive. It will help you to generate a list for adapter script later.
 
 ## Installing the Adapter Script
 
@@ -46,7 +46,7 @@ CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_BIGQUERY AS
 Create a script and run it as in the following example:
 
 ```sql
-SELECT '%jar /buckets/<BFS service>/<bucket>/<archive's name without extension if used>/'|| files || ';' FROM (SELECT EXA_toolbox.bucketfs_ls('/buckets/<BFS service>/<bucket>/<archive's name without extension if used>/') files ); 
+SELECT '%jar /buckets/<BFS service>/<bucket>/<archive's name without extension if used>/'|| files || ';' FROM (SELECT EXA_toolbox.bucketfs_ls('/buckets/<BFS service>/<bucket>/<archive's name without extension if used>/') files );
 ```
 
 ## Defining a Named Connection
@@ -58,7 +58,7 @@ Upload the key to BucketFS, then create a named connection:
 ```sql
 CREATE OR REPLACE CONNECTION BIGQUERY_JDBC_CONNECTION
 TO 'jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=<your project id>;OAuthType=0;OAuthServiceAcctEmail=<service account email>;OAuthPvtKeyPath=/<path to the bucket>/<name of the key file>';
-```    
+```
 You can find additional information about the [JDBC connection string in the Big Query JDBC installation guide](https://www.simba.com/products/BigQuery/doc/JDBC_InstallGuide/content/jdbc/using/intro.htm);
 
 ## Creating a Virtual Schema
@@ -76,25 +76,29 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 
 ## Data Types Conversion
 
-BigQuery Data Type | Supported | Converted Exasol Data Type| Known limitations
--------------------|-----------|---------------------------|-------------------
-BOOLEAN            |  ✓        | BOOLEAN                   | 
-BYTES              |  ×        |                           | 
-DATE               |  ✓        | DATE                      | 
-DATETIME           |  ✓        | TIMESTAMP                 | 
-FLOAT              |  ✓        | DOUBLE                    | Expected range for correct mapping: -99999999.99999999 .. 99999999.99999999. 
-GEOGRAPHY          |  ✓        | VARCHAR(65535)            |
-INTEGER            |  ✓        | DECIMAL(19,0)             | 
-NUMERIC            |  ✓        | VARCHAR(2000000)          | 
-RECORD/STRUCT      |  ×        |                           | 
-STRING             |  ✓        | VARCHAR(65535)            | 
-TIME               |  ✓        | VARCHAR(16)               | 
-TIMESTAMP          |  ✓        | TIMESTAMP                 | Expected range for correct mapping: 1582-10-15 00:00:01 .. 9999-12-31 23:59:59.9999. JDBC driver maps dates before 1582-10-15 00:00:01 incorrectly.  Example of incorrect mapping: 1582-10-14 22:00:01 -> 1582-10-04 22:00:01
+BigQuery Data Type | Supported | Converted Exasol Data Type | Known limitations
+-------------------|-----------|----------------------------|-------------------
+BOOL/ BOOLEAN      |  ✓        | BOOLEAN                    |
+DATE               |  ✓        | DATE                       |
+DATETIME           |  ✓        | TIMESTAMP                  |
+FLOAT / FLOAT64    |  ✓        | DOUBLE                     | Expected range for correct mapping: `-99999999.99999999` .. `99999999.99999999`.
+GEOGRAPHY          |  ✓        | GEOMETRY                   |
+INTEGER / INT64    |  ✓        | ???                        |
+BIGNUMERIC         |  ✓        | ???                        |
+NUMERIC            |  ✓        | ???                        |
+STRING             |  ✓        | VARCHAR(65535)             |
+TIME               |  ✓        | VARCHAR                    |
+TIMESTAMP          |  ✓        | TIMESTAMP                  | Expected range for correct mapping: `1582-10-15 00:00:01` .. `9999-12-31 23:59:59.9999`. JDBC driver maps dates before `1582-10-15 00:00:01` incorrectly. Example of incorrect mapping: `1582-10-14 22:00:01` -> `1582-10-04 22:00:01`
+BYTES              |  ×        |                            |
+STRUCT             |  ×        |                            |
+ARRAY              |  ×        |                            |
+JSON               |  ×        |                            |
+INTERVAL           |  ×        |                            |
 
 ## Performance
 
 Please be aware that the current implementation of the dialect can only handle result sets with limited size (a few thousand rows).
-If you need to process a large amount of data, please contact our support team. Another implementation of the dialect with a performance improvement (using `IMPORT INTO`) is available, but not documented for self-service because of: 
+If you need to process a large amount of data, please contact our support team. Another implementation of the dialect with a performance improvement (using `IMPORT INTO`) is available, but not documented for self-service because of:
 
 1. the complex installation process
 1. security risks (a user has to disable the drivers' security manager to use it)
@@ -103,6 +107,6 @@ If you need to process a large amount of data, please contact our support team. 
 
 In the following matrix you find combinations of JDBC driver and dialect version that we tested.
 
-Virtual Schema Version| Big Query Version   | Driver Name                                 | Driver Version 
+Virtual Schema Version| Big Query Version   | Driver Name                                 | Driver Version
 ----------------------|---------------------|---------------------------------------------|------------------------
  3.0.2                | Google BigQuery 2.0 |  Magnitude Simba JDBC driver for BigQuery   | 1.2.2.1004

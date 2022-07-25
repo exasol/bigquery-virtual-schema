@@ -4,7 +4,7 @@ Code name: Fix data type conversion
 
 ## Summary
 
-This release fixes conversions of the following data types: DATE, ...
+This release fixes conversions of the following BigQuery data types: DATE, TIMESTAMP, DATETIME and GEOGRAPHY.
 
 It also fixes the following vulnerabilities by updating dependencies:
 

@@ -1,4 +1,4 @@
-«# Big Query Virtual Schema
+# Big Query Virtual Schema
 
 [![Build Status](https://github.com/exasol/bigquery-virtual-schema/actions/workflows/ci-build.yml/badge.svg)](https://github.com/exasol/bigquery-virtual-schema/actions/workflows/ci-build.yml)
 
