@@ -28,7 +28,7 @@ It also fixes the following vulnerabilities by updating dependencies:
 * Added `com.exasol:test-db-builder-java:3.3.3`
 * Added `com.exasol:udf-debugging-java:0.6.4`
 * Updated `com.exasol:virtual-schema-common-jdbc:9.0.4` to `9.0.5`
-* Added `com.google.cloud:google-cloud-bigquery:2.13.8`
+* Added `com.google.cloud:google-cloud-bigquery:2.14.0`
 * Added `io.grpc:grpc-core:1.48.0`
 * Added `io.netty:netty-common:4.1.79.Final`
 * Updated `org.junit.jupiter:junit-jupiter:5.8.1` to `5.8.2`
