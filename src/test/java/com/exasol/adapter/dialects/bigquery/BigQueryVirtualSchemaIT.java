@@ -6,12 +6,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.sql.*;
+import java.time.*;
 import java.util.*;
+import java.util.Date;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
@@ -30,7 +28,6 @@ class BigQueryVirtualSchemaIT {
 
     @BeforeAll
     static void beforeAll() {
-        System.setProperty("test.udf-logs", "true");
         assumeTrue(CONFIG.hasGoogleCloudCredentials(), "Local bigquery emulator not yet supported");
         setup = IntegrationTestSetup.create(CONFIG);
     }
@@ -47,6 +44,16 @@ class BigQueryVirtualSchemaIT {
         setup.dropCreatedObjects();
     }
 
+    @Test
+    void emptyResultMapsColumnTypeToSmallInt() throws SQLException {
+        final BigQueryTable table = setup.bigQueryDataset().createTable(
+                Schema.of(Field.of("id", StandardSQLTypeName.INT64), Field.of("name", StandardSQLTypeName.STRING)));
+        final VirtualSchema virtualSchema = setup.createVirtualSchema("virtualSchema");
+        final ResultSet result = setup.getStatement()
+                .executeQuery("SELECT * FROM " + table.getQualifiedName(virtualSchema));
+        assertThat(result, ResultSetStructureMatcher.table("SMALLINT", "SMALLINT").matches());
+    }
+
     List<DataTypeTestCase> createDataTypes() {
         return List.of(DataTypeTestCase.of(StandardSQLTypeName.STRING, "val", "VARCHAR", "val"),
                 DataTypeTestCase.of(StandardSQLTypeName.NUMERIC, 123.456, "DOUBLE PRECISION", 123.456D),
@@ -54,7 +61,7 @@ class BigQueryVirtualSchemaIT {
                 DataTypeTestCase.of(StandardSQLTypeName.BIGNUMERIC, 423450983425L, "DOUBLE PRECISION",
                         4.23450983425E11D),
                 DataTypeTestCase.of(StandardSQLTypeName.BOOL, true, "BOOLEAN", true),
-                DataTypeTestCase.of(StandardSQLTypeName.DATE, "2022-03-15", "DATE", date("2022-03-15")),
+                DataTypeTestCase.of(StandardSQLTypeName.DATE, "2022-07-25", "DATE", date("2022-07-25")),
                 DataTypeTestCase.of(StandardSQLTypeName.DATETIME, "2022-03-15 15:40:30.123", "TIMESTAMP",
                         timestamp("2022-03-15T15:40:30.123Z")),
                 DataTypeTestCase.of(StandardSQLTypeName.TIMESTAMP, "2022-03-15 15:40:30.123", "TIMESTAMP",
@@ -65,7 +72,7 @@ class BigQueryVirtualSchemaIT {
     }
 
     private static Date date(final String date) {
-        return Date.valueOf(LocalDate.parse(date));
+        return Date.from(LocalDate.parse(date).atStartOfDay(ZoneId.of("UTC")).toInstant());
     }
 
     private static Timestamp timestamp(final String timestamp) {
@@ -75,15 +82,7 @@ class BigQueryVirtualSchemaIT {
     @TestFactory
     Stream<DynamicNode> dataTypeConversion() {
         final List<DataTypeTestCase> tests = createDataTypes();
-        final List<Field> fields = new ArrayList<>();
-        fields.add(Field.of("id", StandardSQLTypeName.INT64));
-        fields.addAll(tests.stream().map(DataTypeTestCase::getField).collect(toList()));
-        final BigQueryTable table = setup.bigQueryDataset().createTable(Schema.of(fields));
-        final Map<String, Object> rowWithNonNullValues = tests.stream().filter(t -> t.bigQueryValue != null)
-                .collect(toMap(DataTypeTestCase::getColumnName, DataTypeTestCase::getBigQueryValue));
-        rowWithNonNullValues.put("id", 1);
-        final Map<String, Object> rowWithNullValues = Map.of("id", 2);
-        table.insertRows(List.of(rowWithNonNullValues, rowWithNullValues));
+        final BigQueryTable table = prepareTable(tests);
         final VirtualSchema virtualSchema = setup.createVirtualSchema("virtualSchema");
         return tests.stream().map(test -> DynamicTest.dynamicTest(test.getTestName(), () -> {
             final ResultSet result = setup.getStatement().executeQuery("SELECT \"" + test.getColumnName() + "\" FROM "
@@ -93,6 +92,23 @@ class BigQueryVirtualSchemaIT {
                             .withCalendar(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
                             .row(test.expectedExasolValue).row((Object) null).matches());
         }));
+    }
+
+    private BigQueryTable prepareTable(final List<DataTypeTestCase> tests) {
+        final List<Field> fields = new ArrayList<>();
+        fields.add(Field.of("id", StandardSQLTypeName.INT64));
+        fields.addAll(tests.stream().map(DataTypeTestCase::getField).collect(toList()));
+        final BigQueryTable table = setup.bigQueryDataset().createTable(Schema.of(fields));
+        insertTestData(tests, table);
+        return table;
+    }
+
+    private void insertTestData(final List<DataTypeTestCase> tests, final BigQueryTable table) {
+        final Map<String, Object> rowWithData = tests.stream()
+                .collect(toMap(DataTypeTestCase::getColumnName, DataTypeTestCase::getBigQueryValue));
+        rowWithData.put("id", 1);
+        final Map<String, Object> rowWithNulls = Map.of("id", 2);
+        table.insertRows(List.of(rowWithData, rowWithNulls));
     }
 
     static class DataTypeTestCase {
