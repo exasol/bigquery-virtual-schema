@@ -83,9 +83,9 @@ DATE               |  ✓        | DATE                       |
 DATETIME           |  ✓        | TIMESTAMP                  |
 FLOAT / FLOAT64    |  ✓        | DOUBLE                     | Expected range for correct mapping: `-99999999.99999999` .. `99999999.99999999`.
 GEOGRAPHY          |  ✓        | GEOMETRY                   |
-INTEGER / INT64    |  ✓        | ???                        |
-BIGNUMERIC         |  ✓        | ???                        |
-NUMERIC            |  ✓        | ???                        |
+INTEGER / INT64    |  ✓        | DECIMAL                    |
+BIGNUMERIC         |  ✓        | DOUBLE PRECISION           | Expected range for correct mapping: `-99999999.99999999` .. `99999999.99999999`.
+NUMERIC            |  ✓        | DOUBLE PRECISION           | Expected range for correct mapping: `-99999999.99999999` .. `99999999.99999999`.
 STRING             |  ✓        | VARCHAR(65535)             |
 TIME               |  ✓        | VARCHAR                    |
 TIMESTAMP          |  ✓        | TIMESTAMP                  | Expected range for correct mapping: `1582-10-15 00:00:01` .. `9999-12-31 23:59:59.9999`. JDBC driver maps dates before `1582-10-15 00:00:01` incorrectly. Example of incorrect mapping: `1582-10-14 22:00:01` -> `1582-10-04 22:00:01`
@@ -95,13 +95,19 @@ ARRAY              |  ×        |                            |
 JSON               |  ×        |                            |
 INTERVAL           |  ×        |                            |
 
-## Performance
+## Known Limitations
+
+### Performance
 
 Please be aware that the current implementation of the dialect can only handle result sets with limited size (a few thousand rows).
 If you need to process a large amount of data, please contact our support team. Another implementation of the dialect with a performance improvement (using `IMPORT INTO`) is available, but not documented for self-service because of:
 
 1. the complex installation process
-1. security risks (a user has to disable the drivers' security manager to use it)
+1. security risks (a user has to disable the driver's security manager to use it)
+
+### Mapping of Empty Result
+
+If a query returns an empty result set, the Virtual Schema will map all columns to type `SMALLINT`.
 
 ## Testing information
 
@@ -109,4 +115,4 @@ In the following matrix you find combinations of JDBC driver and dialect version
 
 Virtual Schema Version| Big Query Version   | Driver Name                                 | Driver Version
 ----------------------|---------------------|---------------------------------------------|------------------------
- 3.0.2                | Google BigQuery 2.0 |  Magnitude Simba JDBC driver for BigQuery   | 1.2.2.1004
+ 9.0.5                | Google BigQuery 2.0 |  Magnitude Simba JDBC driver for BigQuery   | 1.2.25.1029

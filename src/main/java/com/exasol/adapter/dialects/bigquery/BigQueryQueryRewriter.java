@@ -2,10 +2,11 @@ package com.exasol.adapter.dialects.bigquery;
 
 import java.math.BigInteger;
 import java.sql.*;
-import java.util.StringJoiner;
+import java.sql.Date;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
@@ -23,14 +24,15 @@ import com.exasol.adapter.sql.SqlStatement;
  */
 public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter {
     private static final Logger LOGGER = Logger.getLogger(BigQueryQueryRewriter.class.getName());
-    private static final double[] TEN_POWERS = { 10d, 100d, 1000d, 10000d, 100000d, 1000000d };
-    @SuppressWarnings("squid:S4784") // this pattern is secure
-    private static final Pattern DATE_PATTERN = Pattern.compile("(\\d{4})-(\\d{1,2})-(\\d{1,2})");
-    @SuppressWarnings("squid:S4784") // this pattern is secure
-    private static final Pattern TIMESTAMP_PATTERN = Pattern
-            .compile("(\\d{4})-(\\d{1,2})-(\\d{1,2})[T\\s](\\d{1,2}):(\\d{1,2}):(\\d{1,2})(?:\\.(\\d{1,6}))?");
     private static final String CAST = "CAST";
     private static final String CAST_NULL_AS_VARCHAR_4 = CAST + " (NULL AS VARCHAR(4))";
+
+    private static final ZoneId UTC_TIMEZONE_ID = ZoneId.of("UTC");
+    private static final Calendar UTC_CALENDAR = Calendar.getInstance(TimeZone.getTimeZone(UTC_TIMEZONE_ID));
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+            .withZone(UTC_TIMEZONE_ID);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            .withZone(UTC_TIMEZONE_ID);
 
     /**
      * Create a new instance of the {@link BigQueryQueryRewriter}.
@@ -137,6 +139,8 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
             appendVarchar(builder, resultSet, columnName);
             break;
         case Types.TIME:
+            appendVarchar(builder, resultSet, columnName);
+            break;
         case Types.VARBINARY:
         default:
             LOGGER.info(() -> "Mapping unknown column " + columnName + " of type " + type + "/" + typeName);
@@ -153,7 +157,8 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
 
     private void appendGeometry(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
-        final String value = resultSet.wasNull() ? "NULL" : "'" + resultSet.getString(columnName) + "'";
+        String value = resultSet.getString(columnName);
+        value = resultSet.wasNull() ? "NULL" : "'" + value + "'";
         builder.append(CAST + " (" + value + " AS GEOMETRY)");
     }
 
@@ -177,62 +182,23 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
 
     private void appendDate(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
-        final String value = resultSet.getString(columnName);
-        if (value == null) {
+        final Date date = resultSet.getDate(columnName, UTC_CALENDAR);
+        if (date == null) {
             builder.append(CAST + " (NULL AS DATE)");
         } else {
-            builder.append(castDate(value));
-        }
-    }
-
-    private String castDate(final String dateToCast) {
-        final Matcher matcher = DATE_PATTERN.matcher(dateToCast);
-        if (matcher.matches()) {
-            final int year = Integer.parseInt(matcher.group(1));
-            final int month = Integer.parseInt(matcher.group(2));
-            final int day = Integer.parseInt(matcher.group(3));
-            return String.format("CAST ('%04d-%02d-%02d' AS DATE)", year, month, day);
-        } else {
-            throw new IllegalArgumentException(
-                    "Date does not match required format: YYYY-[M]M-[D]D. Actual value was:" + dateToCast);
+            builder.append(CAST + "('" + DATE_FORMATTER.format(date.toLocalDate()) + "' AS DATE)");
         }
     }
 
     private void appendTimestamp(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
-        final String value = resultSet.getString(columnName);
-        if (value == null) {
+        final Timestamp timestamp = resultSet.getTimestamp(columnName, UTC_CALENDAR);
+        if (timestamp == null) {
             builder.append(CAST + " (NULL AS TIMESTAMP)");
         } else {
             builder.append("CAST ('");
-            builder.append(convertTimestampFormat(value));
+            builder.append(TIMESTAMP_FORMATTER.format(timestamp.toInstant()));
             builder.append("' AS TIMESTAMP)");
-        }
-    }
-
-    private String convertTimestampFormat(final String timestamp) {
-        final Matcher matcher = TIMESTAMP_PATTERN.matcher(timestamp);
-        if (matcher.matches()) {
-            final int year = Integer.parseInt(matcher.group(1));
-            final int month = Integer.parseInt(matcher.group(2));
-            final int day = Integer.parseInt(matcher.group(3));
-
-            final int hour = Integer.parseInt(matcher.group(4));
-            final int minute = Integer.parseInt(matcher.group(5));
-            final int second = Integer.parseInt(matcher.group(6));
-            final String fractionOfSecond = matcher.group(7);
-            if (fractionOfSecond != null) {
-                final int fractionOfSecondInt = Integer.parseInt(fractionOfSecond);
-                final int fractionOfSecondRounded = (int) Math
-                        .round((fractionOfSecondInt / TEN_POWERS[fractionOfSecond.length() - 1]) * 1000);
-                return String.format("%04d-%02d-%02d %02d:%02d:%02d.%03d", year, month, day, hour, minute, second,
-                        fractionOfSecondRounded);
-            } else {
-                return String.format("%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second);
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "Timestamp '" + timestamp + "'' does not match required format: " + TIMESTAMP_PATTERN);
         }
     }
 
