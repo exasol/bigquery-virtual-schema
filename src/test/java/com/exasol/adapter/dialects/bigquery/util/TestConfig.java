@@ -58,6 +58,10 @@ public class TestConfig {
         return new GoogleCloudCredentials(serviceAccountEmail, privateKey);
     }
 
+    public String getGoogleProjectId() {
+        return getMandatoryValue("googleProjectId");
+    }
+
     public String getMandatoryValue(final String param) {
         return getOptionalValue(param)
                 .orElseThrow(() -> new IllegalStateException("Property '" + param + "' not found in config file"));

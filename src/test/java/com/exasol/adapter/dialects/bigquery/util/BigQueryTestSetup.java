@@ -13,7 +13,7 @@ public interface BigQueryTestSetup {
     }
 
     public static BigQueryTestSetup createGoogleCloudSetup(final TestConfig config) {
-        return new GoogleCloudBigQuerySetup(config.getGoogleCloudCredentials());
+        return new GoogleCloudBigQuerySetup(config);
     }
 
     void close();

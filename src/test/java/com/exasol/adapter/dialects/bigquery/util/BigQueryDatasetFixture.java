@@ -78,9 +78,9 @@ public class BigQueryDatasetFixture implements AutoCloseable {
             }
         }
 
-        public void insertRow(final Map<String, ?> content) {
+        public void insertRows(final List<Map<String, ?>> rows) {
             final InsertAllResponse response = client
-                    .insertAll(InsertAllRequest.of(tableInfo, RowToInsert.of(content)));
+                    .insertAll(InsertAllRequest.of(tableInfo, rows.stream().map(RowToInsert::of).collect(toList())));
             final List<String> insertErrors = response.getInsertErrors().values().stream().flatMap(List::stream)
                     .map(BigQueryError::toString).collect(toList());
             if (!insertErrors.isEmpty()) {

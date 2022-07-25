@@ -49,27 +49,18 @@ class BigQueryVirtualSchemaIT {
 
     List<DataTypeTestCase> createDataTypes() {
         return List.of(DataTypeTestCase.of(StandardSQLTypeName.STRING, "val", "VARCHAR", "val"),
-                DataTypeTestCase.ofNullValue(StandardSQLTypeName.STRING, "VARCHAR"),
-                DataTypeTestCase.of(StandardSQLTypeName.NUMERIC, 123.456, "DECIMAL", BigDecimal.valueOf(123.456)),
-                DataTypeTestCase.ofNullValue(StandardSQLTypeName.NUMERIC, "DECIMAL"),
-                DataTypeTestCase.of(StandardSQLTypeName.INT64, 123456, "INTEGER", 123456),
-                DataTypeTestCase.ofNullValue(StandardSQLTypeName.INT64, "INTEGER"),
-                DataTypeTestCase.of(StandardSQLTypeName.BIGNUMERIC, 423450983425L, "BIGINT", 423450983425L),
-                DataTypeTestCase.ofNullValue(StandardSQLTypeName.BIGNUMERIC, "BIGINT"),
+                DataTypeTestCase.of(StandardSQLTypeName.NUMERIC, 123.456, "DOUBLE PRECISION", 123.456D),
+                DataTypeTestCase.of(StandardSQLTypeName.INT64, 123456, "DECIMAL", BigDecimal.valueOf(123456)),
+                DataTypeTestCase.of(StandardSQLTypeName.BIGNUMERIC, 423450983425L, "DOUBLE PRECISION",
+                        4.23450983425E11D),
                 DataTypeTestCase.of(StandardSQLTypeName.BOOL, true, "BOOLEAN", true),
-                DataTypeTestCase.ofNullValue(StandardSQLTypeName.BOOL, "BOOLEAN"),
                 DataTypeTestCase.of(StandardSQLTypeName.DATE, "2022-03-15", "DATE", date("2022-03-15")),
-                DataTypeTestCase.ofNullValue(StandardSQLTypeName.DATE, "DATE"),
                 DataTypeTestCase.of(StandardSQLTypeName.DATETIME, "2022-03-15 15:40:30.123", "TIMESTAMP",
                         timestamp("2022-03-15T15:40:30.123Z")),
-                DataTypeTestCase.ofNullValue(StandardSQLTypeName.DATETIME, "TIMESTAMP"),
                 DataTypeTestCase.of(StandardSQLTypeName.TIMESTAMP, "2022-03-15 15:40:30.123", "TIMESTAMP",
                         timestamp("2022-03-15T15:40:30.123Z")),
-                DataTypeTestCase.ofNullValue(StandardSQLTypeName.TIMESTAMP, "TIMESTAMP"),
-                DataTypeTestCase.of(StandardSQLTypeName.FLOAT64, 3.14, "DECIMAL", BigDecimal.valueOf(3.14)),
-                DataTypeTestCase.ofNullValue(StandardSQLTypeName.FLOAT64, "DECIMAL"),
-                DataTypeTestCase.of(StandardSQLTypeName.GEOGRAPHY, "POINT(1 4)", "GEOMETRY", "POINT (1 4)"),
-                DataTypeTestCase.ofNullValue(StandardSQLTypeName.GEOGRAPHY, "GEOMETRY"));
+                DataTypeTestCase.of(StandardSQLTypeName.FLOAT64, 3.14, "DOUBLE PRECISION", 3.14D),
+                DataTypeTestCase.of(StandardSQLTypeName.GEOGRAPHY, "POINT(1 4)", "GEOMETRY", "POINT (1 4)"));
     }
 
     private static Date date(final String date) {
@@ -83,19 +74,23 @@ class BigQueryVirtualSchemaIT {
     @TestFactory
     Stream<DynamicNode> dataTypeConversion() {
         final List<DataTypeTestCase> tests = createDataTypes();
-        final List<Field> fields = tests.stream().map(DataTypeTestCase::getField).collect(toList());
+        final List<Field> fields = new ArrayList<>();
+        fields.add(Field.of("id", StandardSQLTypeName.INT64));
+        fields.addAll(tests.stream().map(DataTypeTestCase::getField).collect(toList()));
         final BigQueryTable table = setup.bigQueryDataset().createTable(Schema.of(fields));
-        table.insertRow(tests.stream().filter(t -> t.bigQueryValue != null)
-                .collect(toMap(DataTypeTestCase::getColumnName, DataTypeTestCase::getBigQueryValue)));
-        final VirtualSchema virtualSchema = setup.createVirtualSchema("myvs");
-
+        final Map<String, Object> rowWithNonNullValues = tests.stream().filter(t -> t.bigQueryValue != null)
+                .collect(toMap(DataTypeTestCase::getColumnName, DataTypeTestCase::getBigQueryValue));
+        rowWithNonNullValues.put("id", 1);
+        final Map<String, Object> rowWithNullValues = Map.of("id", 2);
+        table.insertRows(List.of(rowWithNonNullValues, rowWithNullValues));
+        final VirtualSchema virtualSchema = setup.createVirtualSchema("virtualSchema");
         return tests.stream().map(test -> DynamicTest.dynamicTest(test.getTestName(), () -> {
-            final ResultSet result = setup.getStatement().executeQuery(
-                    "SELECT \"" + test.getColumnName() + "\" from " + table.getQualifiedName(virtualSchema));
+            final ResultSet result = setup.getStatement().executeQuery("SELECT \"" + test.getColumnName() + "\" FROM "
+                    + table.getQualifiedName(virtualSchema) + " ORDER BY \"id\" ASC");
             assertThat(result,
                     ResultSetStructureMatcher.table(test.expectedExasolType)
                             .withCalendar(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
-                            .row(test.expectedExasolValue).matches());
+                            .row(test.expectedExasolValue).row((Object) null).matches());
         }));
     }
 
@@ -108,11 +103,11 @@ class BigQueryVirtualSchemaIT {
 
         private DataTypeTestCase(final StandardSQLTypeName bigQueryType, final Object bigQueryValue,
                 final String expectedExasolType, final Object expectedExasolValue) {
-            this.bigQueryType = bigQueryType;
-            this.bigQueryValue = bigQueryValue;
+            this.bigQueryType = Objects.requireNonNull(bigQueryType);
+            this.bigQueryValue = Objects.requireNonNull(bigQueryValue);
             this.expectedExasolType = expectedExasolType;
             this.expectedExasolValue = expectedExasolValue;
-            this.field = Field.of("col_" + bigQueryType + (bigQueryValue == null ? "_null" : ""), bigQueryType);
+            this.field = Field.of("col_" + bigQueryType, bigQueryType);
         }
 
         static DataTypeTestCase of(final StandardSQLTypeName bigQueryType, final Object bigQueryValue,
@@ -120,13 +115,12 @@ class BigQueryVirtualSchemaIT {
             return new DataTypeTestCase(bigQueryType, bigQueryValue, expectedExasolType, expectedExasolValue);
         }
 
-        static DataTypeTestCase ofNullValue(final StandardSQLTypeName bigQueryType, final String expectedExasolType) {
+        static DataTypeTestCase xxofNullValue(final StandardSQLTypeName bigQueryType, final String expectedExasolType) {
             return of(bigQueryType, null, expectedExasolType, null);
         }
 
         public String getTestName() {
-            return "Type " + bigQueryType + (bigQueryValue == null ? " value null" : "") + " mapped to "
-                    + expectedExasolType;
+            return "Type " + bigQueryType + " mapped to " + expectedExasolType;
         }
 
         public Field getField() {

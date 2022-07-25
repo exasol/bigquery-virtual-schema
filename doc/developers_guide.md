@@ -12,5 +12,6 @@ Integration tests are prepared to use a local [bigquery-emulator](https://github
     ```properties
     serviceAccountEmail = your.google.account@example.com
     privateKeyPath = /path/to/private-key.json
+    googleProjectId = google-project-id
     ```
-    If these entries are missing, the local setup is used by default.
+    If file `test.properties` or any of it's entries is missing, then integration tests will use the local local bigquery-emulator by default, which as stated before does not support all required features, yet.

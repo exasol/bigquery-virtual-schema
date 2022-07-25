@@ -3,7 +3,6 @@ package com.exasol.adapter.dialects.bigquery.util;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import com.exasol.bucketfs.Bucket;
@@ -15,10 +14,10 @@ import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 
 public class GoogleCloudBigQuerySetup implements BigQueryTestSetup {
-    private final GoogleCloudCredentials credentials;
+    private final TestConfig config;
 
-    public GoogleCloudBigQuerySetup(final GoogleCloudCredentials credentials) {
-        this.credentials = Objects.requireNonNull(credentials, "credentials");
+    public GoogleCloudBigQuerySetup(final TestConfig config) {
+        this.config = config;
     }
 
     @Override
@@ -30,10 +29,11 @@ public class GoogleCloudBigQuerySetup implements BigQueryTestSetup {
     }
 
     private Credentials createGoogleCredentials() {
+        final Path privateKey = config.getGoogleCloudCredentials().privateKey;
         try {
-            return GoogleCredentials.fromStream(Files.newInputStream(credentials.privateKey));
+            return GoogleCredentials.fromStream(Files.newInputStream(privateKey));
         } catch (final IOException exception) {
-            throw new UncheckedIOException("Failed to load credentials from " + credentials.privateKey, exception);
+            throw new UncheckedIOException("Failed to load credentials from " + privateKey, exception);
         }
     }
 
@@ -44,7 +44,7 @@ public class GoogleCloudBigQuerySetup implements BigQueryTestSetup {
 
     @Override
     public String getProjectId() {
-        return "pin-dev-bigquery";
+        return config.getGoogleProjectId();
     }
 
     @Override
@@ -52,14 +52,16 @@ public class GoogleCloudBigQuerySetup implements BigQueryTestSetup {
         final String url = "https://" + serviceAddress.getHostName() + ":" + serviceAddress.getPort();
         final String bucketFsCredentialsPath = uploadCredentials(bucket);
         return "jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;RootURL=" + url + ";ProjectId="
-                + getProjectId() + ";OAuthType=0;OAuthServiceAcctEmail=" + credentials.serviceAccountEmail
-                + ";OAuthPvtKeyPath=" + bucketFsCredentialsPath;
+                + getProjectId() + ";OAuthType=0;OAuthServiceAcctEmail="
+                + config.getGoogleCloudCredentials().serviceAccountEmail + ";OAuthPvtKeyPath="
+                + bucketFsCredentialsPath;
     }
 
     private String uploadCredentials(final Bucket bucket) {
+        final Path privateKey = config.getGoogleCloudCredentials().privateKey;
         try {
-            final String filename = credentials.privateKey.getFileName().toString();
-            bucket.uploadFile(credentials.privateKey, filename);
+            final String filename = privateKey.getFileName().toString();
+            bucket.uploadFile(privateKey, filename);
             return IntegrationTestSetup.BUCKETFS_ROOT_PATH + filename;
         } catch (FileNotFoundException | BucketAccessException | TimeoutException exception) {
             throw new IllegalStateException("Failed to upload google cloud credentials", exception);
