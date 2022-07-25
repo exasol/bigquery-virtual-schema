@@ -60,7 +60,10 @@ class BigQueryVirtualSchemaIT {
                 DataTypeTestCase.of(StandardSQLTypeName.TIMESTAMP, "2022-03-15 15:40:30.123", "TIMESTAMP",
                         timestamp("2022-03-15T15:40:30.123Z")),
                 DataTypeTestCase.of(StandardSQLTypeName.FLOAT64, 3.14, "DOUBLE PRECISION", 3.14D),
-                DataTypeTestCase.of(StandardSQLTypeName.GEOGRAPHY, "POINT(1 4)", "GEOMETRY", "POINT (1 4)"));
+                DataTypeTestCase.of(StandardSQLTypeName.GEOGRAPHY, "POINT(1 4)", "GEOMETRY", "POINT (1 4)"),
+                DataTypeTestCase.of(StandardSQLTypeName.TIME, "14:15:16.123", "VARCHAR", "14:15:16.123")
+
+        );
     }
 
     private static Date date(final String date) {

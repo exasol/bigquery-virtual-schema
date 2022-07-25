@@ -1,9 +1,7 @@
 package com.exasol.adapter.dialects.bigquery.util;
 
-import static java.util.stream.Collectors.toList;
-
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.sql.*;
@@ -13,7 +11,7 @@ import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.exasol.adapter.dialects.bigquery.util.zip.ZipDownloader;
+import com.exasol.adapter.dialects.bigquery.util.zip.JdbcDriverProvider;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.dbbuilder.dialects.DatabaseObject;
@@ -80,11 +78,6 @@ public class IntegrationTestSetup implements AutoCloseable {
         }
     }
 
-    public InetSocketAddress makeLocalServiceAvailableInExasol(final int port) {
-        final ServiceAddress serviceAddress = this.exasolTestSetup.makeLocalTcpServiceAccessibleFromDatabase(port);
-        return new InetSocketAddress(serviceAddress.getHostName(), serviceAddress.getPort());
-    }
-
     public ConnectionDefinition createConnectionDefinition() {
         final ServiceAddress bigQueryServiceAddress = this.exasolTestSetup
                 .makeTcpServiceAccessibleFromDatabase(bigQueryTestSetup.getServiceAddress());
@@ -93,7 +86,7 @@ public class IntegrationTestSetup implements AutoCloseable {
     }
 
     AdapterScript createAdapterScript(final ExasolSchema adapterSchema)
-            throws BucketAccessException, TimeoutException, IOException, URISyntaxException {
+            throws FileNotFoundException, BucketAccessException, TimeoutException {
         getBucket().uploadFile(ADAPTER_JAR_LOCAL_PATH, ADAPTER_JAR);
         return adapterSchema.createAdapterScriptBuilder("ADAPTER_SCRIPT_BIGQUERY")
                 .bucketFsContent("com.exasol.adapter.RequestDispatcher", getAdapterJarsInBucketFs())
@@ -101,42 +94,14 @@ public class IntegrationTestSetup implements AutoCloseable {
     }
 
     @NotNull
-    private String[] getAdapterJarsInBucketFs()
-            throws IOException, URISyntaxException, BucketAccessException, TimeoutException {
+    private String[] getAdapterJarsInBucketFs() {
+        final JdbcDriverProvider uploader = new JdbcDriverProvider(getBucket());
+        final List<String> jarFiles = uploader.uploadJdbcDriverToBucketFs(
+                "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029.zip");
         final List<String> jars = new ArrayList<>();
         jars.add(BUCKETFS_ROOT_PATH + ADAPTER_JAR);
-        jars.addAll(uploadJdbcDriverToBucketFs());
+        jars.addAll(jarFiles);
         return jars.toArray(new String[0]);
-    }
-
-    private List<String> uploadJdbcDriverToBucketFs()
-            throws IOException, URISyntaxException, BucketAccessException, TimeoutException {
-        final JdbcDriver jdbcDriver = new JdbcDriver().withSourceUrl(
-                "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029.zip")
-                .withLocalFolder("target");
-
-        final ZipDownloader extracting = ZipDownloader.extracting(jdbcDriver.getDownloadUrl(),
-                jdbcDriver.getLocalCopy());
-
-        if (!extracting.localCopyExists()) {
-            extracting.download();
-        }
-
-        final BucketFsFolder bucketFs = new BucketFsFolder(exasolTestSetup.getDefaultBucket(),
-                jdbcDriver.getBucketFsFolder());
-
-        final List<Path> jarPaths = extracting.inventory("*.jar");
-        for (final Path file : jarPaths) {
-            final String target = jdbcDriver.getPathInBucketFs(file);
-            if (!bucketFs.contains(file)) {
-                LOGGER.finest("Uploading to bucketfs: " + target);
-                exasolTestSetup.getDefaultBucket().uploadFile(file, target);
-            }
-        }
-
-        return jarPaths.stream().map(path -> path.getFileName().toString())
-                .map(fileName -> BUCKETFS_ROOT_PATH + jdbcDriver.getBucketFsFolder() + "/" + fileName)
-                .collect(toList());
     }
 
     @Override
