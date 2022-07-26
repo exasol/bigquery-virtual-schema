@@ -11,8 +11,9 @@ Download the [Simba JDBC Driver for Google BigQuery](https://cloud.google.com/bi
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
 1. [Upload the driver to BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/accessfiles.htm)
 
-**Hint**: The JDBC driver contains a lot of jar files, but you can upload all of them together as an archive (`.zip` or `.tar.gz`, for example).
-The archive will be unpacked automatically in the bucket, and you can access the files using the following path pattern `<your bucket>/<archive's name without extension>/<name of a file form the archive>.jar`.
+When uploading the archive to the bucket then the Exasol database will automatically extract the contents of the archive and your UDF can access the files using the following path pattern `<your bucket>/<archive's name without extension>/<name of a file from the archive>.jar`.
+
+See the [Exasol documentation](https://docs.exasol.com/db/latest/database_concepts/bucketfs/database_access.htm) for accessing BucketFS.
 
 Leave only `.jar` files in the archive. It will help you to generate a list for adapter script later.
 
@@ -101,7 +102,7 @@ INTERVAL           |  ×        |                            |
 
 Please be aware that the current implementation of the dialect can only handle result sets with limited size (a few thousand rows).
 
-If you need to process a large amount of data, please contact our support team. Another implementation of the dialect with a performance improvement (using `IMPORT INTO`) is available, but not documented for self-service because of:
+If you need to process a large amount of data, please contact the Exasol support team. Another implementation of the dialect with a performance improvement (using `IMPORT INTO`) is available, but not documented for self-service because of:
 
 1. the complex installation process
 1. security risks (a user has to disable the driver's security manager to use it)
@@ -112,7 +113,7 @@ If a query returns an empty result set, the Virtual Schema will map all columns 
 
 ## Testing information
 
-In the following matrix you find combinations of JDBC driver and dialect version that we tested:
+In the following matrix you find combinations of JDBC driver and dialect version that Exasol developer have tested successfully:
 
 Virtual Schema Version | Big Query Version   | Driver Name                              | Driver Version
 -----------------------|---------------------|------------------------------------------|-----------------

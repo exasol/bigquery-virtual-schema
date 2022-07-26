@@ -143,7 +143,8 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
             break;
         case Types.VARBINARY:
         default:
-            LOGGER.info(() -> "Mapping unknown column " + columnName + " of type " + type + "/" + typeName);
+            LOGGER.info(
+                    () -> "Mapping unknown column " + columnName + " of type " + type + "/" + typeName + " to string");
             appendString(builder, resultSet, columnName);
             break;
         }

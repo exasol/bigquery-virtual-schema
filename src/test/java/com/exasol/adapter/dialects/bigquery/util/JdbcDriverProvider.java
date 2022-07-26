@@ -46,8 +46,8 @@ class JdbcDriverProvider {
             if (!bucket.listContents().contains(fileName.toString())) {
                 bucket.uploadFile(localFile, "/");
             }
-        } catch (FileNotFoundException | BucketAccessException | TimeoutException e) {
-            throw new IllegalStateException("Error uploading to bucketfs");
+        } catch (FileNotFoundException | BucketAccessException | TimeoutException exception) {
+            throw new IllegalStateException("Error uploading to bucketfs", exception);
         }
     }
 
@@ -89,8 +89,8 @@ class JdbcDriverProvider {
             try (InputStream input = remote.openStream()) {
                 Files.copy(input, localCopy);
             }
-        } catch (URISyntaxException | IOException e) {
-            throw new IllegalStateException("Error downloading file from " + downloadUrl);
+        } catch (URISyntaxException | IOException exception) {
+            throw new IllegalStateException("Error downloading file from " + downloadUrl, exception);
         }
     }
 }

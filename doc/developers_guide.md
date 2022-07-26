@@ -4,7 +4,7 @@ This guide contains information for developers.
 
 ## Running Integration Tests Against Google Cloud
 
-Integration tests are prepared to use a local [bigquery-emulator](https://github.com/goccy/bigquery-emulator), but the project does not yet support all required features. Until this is finished you can run integration tests against BigQuery in Google Cloud:
+Integration tests are prepared to use a local [bigquery-emulator](https://github.com/goccy/bigquery-emulator), but the emulator does not yet support all required features. Until this is finished it's only possible to run integration tests against BigQuery in Google Cloud:
 
 1. Login to Google Cloud, create a Service Account and download the private key as JSON file.
 2. Create file `test.properties` with the following content:
@@ -16,6 +16,7 @@ Integration tests are prepared to use a local [bigquery-emulator](https://github
 
     udfLoggingEnabled = true
     ```
-    If file `test.properties` or any of it's entries is missing, then integration tests will use the local local bigquery-emulator by default, which as stated before does not support all required features, yet.
+    
+If file `test.properties` or one of `googleProjectId`, `serviceAccountEmail`, or `privateKeyPath` is missing, then integration tests will be skipped.
 
-    * When `udfLoggingEnabled` is set to `true`, UDF logs will be written to `target/udf-logs/*.txt`.
+When `udfLoggingEnabled` is set to `true`, UDF logs will be written to `target/udf-logs/*.txt`.
