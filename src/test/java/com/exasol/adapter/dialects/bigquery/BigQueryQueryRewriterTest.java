@@ -67,8 +67,10 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
                 equalTo("SELECT * FROM VALUES(1, 1, 1, 1, 1) WHERE false"));
     }
 
-    @CsvSource({ "float_col, 8, 105.0", //
-            "float_col, 8, 99.4" //
+    @CsvSource({ "decimal_col, 3, 105.0", //
+            "numeric_col, 2, 105.0", //
+            "double_col, 8, 105.0", //
+            "double_col, 8, 99.4" //
     })
     @ParameterizedTest
     void testRewriteWithFloatingValues(final String columnName, final int type, final double columnValue)
@@ -95,17 +97,42 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
 
     @CsvSource({ "string_col, 12, hello, hello", //
             "string_col, 12, i'm, i\\'m", //
+            "char_col, 1, char value, char value", //
             "time_col, 92, 12:10:09.000, 12:10:09.000", //
-            "numeric_col, 2, 22222.2222, 22222.2222", //
-            "numeric_col, 2, 11.5, 11.5", //
-            "date_col, 91, 1111-01-01, 01.01.1111", //
-            "date_col, 91, 2019-12-3, 03.12.2019", //
-            "date_col, 91, 2019-5-02, 02.05.2019" //
+            "time_varbinary, -3, varbinary, varbinary" //
     })
     @ParameterizedTest
     void testRewriteWithStringValues(final String columnName, final int type, final String columnValue,
             final String resultValue) throws AdapterException, SQLException {
         assertQueryWithOneStringValue(columnName, type, columnValue, "SELECT * FROM VALUES ('" + resultValue + "')");
+    }
+
+    @CsvSource({ "1111-01-01, 1111-01-01", //
+            "2019-12-3, 2019-12-03", //
+            "2019-5-02, 2019-05-02" //
+    })
+    @ParameterizedTest
+    void testRewriteWithDateValues(final java.sql.Date columnValue, final String resultValue)
+            throws AdapterException, SQLException {
+        final String columnName = "col";
+        final int type = Types.DATE;
+        when(this.mockResultSet.getDate(eq(columnName), any(Calendar.class))).thenReturn(columnValue);
+        assertQueryWithOneColumn(columnName, type, null, "SELECT * FROM VALUES (CAST('" + resultValue + "' AS DATE))");
+    }
+
+    @CsvSource({ "22222.2222, 22222.2222", //
+            "-99999999.99999999, -9.999999999999999E7", //
+            "99999999.99999999, 9.999999999999999E7", //
+            "99999999.99999999, 9.999999999999999E7", //
+            "11.5, 11.5", //
+            "42, 42.0" })
+    @ParameterizedTest
+    void testRewriteWithNumeric(final Double columnValue, final String resultValue)
+            throws AdapterException, SQLException {
+        final String columnName = "col";
+        final int type = Types.NUMERIC;
+        when(this.mockResultSet.getDouble(columnName)).thenReturn(columnValue);
+        assertQueryWithOneColumn(columnName, type, null, "SELECT * FROM VALUES (" + resultValue + ")");
     }
 
     private void assertQueryWithOneColumn(final String columnName, final int type, final String typeName,
@@ -130,6 +157,11 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
         assertQueryWithOneStringValue("bigint_col", Types.BIGINT, "123456", "SELECT * FROM VALUES (123456)");
     }
 
+    @Test
+    void testRewriteWithInteger() throws AdapterException, SQLException {
+        assertQueryWithOneStringValue("int_col", Types.INTEGER, "123456", "SELECT * FROM VALUES (123456)");
+    }
+
     @CsvSource({ "1111-01-01T12:10:09.000000Z, 1111-01-01 12:10:09.000", //
             "1111-01-01T12:10:09.000000Z, 1111-01-01 12:10:09.000", //
             "1111-01-01T12:10:09Z, 1111-01-01 12:10:09.000", //
@@ -149,6 +181,20 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
                 .thenReturn(new Timestamp(valueToConvert.toEpochMilli()));
         assertQueryWithOneColumn("timestamp", Types.TIMESTAMP, null,
                 "SELECT * FROM VALUES (CAST ('" + expectedValue + "' AS TIMESTAMP))");
+    }
+
+    @Test
+    void testRewriteWithGeography() throws AdapterException, SQLException {
+        when(this.mockResultSet.getString("col")).thenReturn("POINT(1 2)");
+        assertQueryWithOneColumn("col", Types.VARCHAR, "GEOGRAPHY",
+                "SELECT * FROM VALUES (CAST ('POINT(1 2)' AS GEOMETRY))");
+    }
+
+    @Test
+    void testRewriteWithNullGeography() throws AdapterException, SQLException {
+        when(this.mockResultSet.getString("col")).thenReturn(null);
+        when(this.mockResultSet.wasNull()).thenReturn(true);
+        assertQueryWithOneColumn("col", Types.VARCHAR, "GEOGRAPHY", "SELECT * FROM VALUES (CAST (NULL AS GEOMETRY))");
     }
 
     @Test
