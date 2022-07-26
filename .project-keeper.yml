@@ -1,0 +1,10 @@
+sources:
+  - type: maven
+    path: pom.xml
+    modules:
+      - integration_tests
+      - jar_artifact
+linkReplacements:
+  - "https://netty.io/netty-common/|https://netty.io"
+excludes:
+

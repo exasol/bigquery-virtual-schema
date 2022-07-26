@@ -3,9 +3,12 @@ package com.exasol.adapter.dialects.bigquery;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.sql.*;
+import java.time.Instant;
+import java.util.Calendar;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,8 +67,10 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
                 equalTo("SELECT * FROM VALUES(1, 1, 1, 1, 1) WHERE false"));
     }
 
-    @CsvSource({ "float_col, 8, 105.0", //
-            "float_col, 8, 99.4" //
+    @CsvSource({ "decimal_col, 3, 105.0", //
+            "numeric_col, 2, 105.0", //
+            "double_col, 8, 105.0", //
+            "double_col, 8, 99.4" //
     })
     @ParameterizedTest
     void testRewriteWithFloatingValues(final String columnName, final int type, final double columnValue)
@@ -92,12 +97,9 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
 
     @CsvSource({ "string_col, 12, hello, hello", //
             "string_col, 12, i'm, i\\'m", //
+            "char_col, 1, char value, char value", //
             "time_col, 92, 12:10:09.000, 12:10:09.000", //
-            "numeric_col, 2, 22222.2222, 22222.2222", //
-            "numeric_col, 2, 11.5, 11.5", //
-            "date_col, 91, 1111-01-01, 01.01.1111", //
-            "date_col, 91, 2019-12-3, 03.12.2019", //
-            "date_col, 91, 2019-5-02, 02.05.2019" //
+            "time_varbinary, -3, varbinary, varbinary" //
     })
     @ParameterizedTest
     void testRewriteWithStringValues(final String columnName, final int type, final String columnValue,
@@ -105,15 +107,49 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
         assertQueryWithOneStringValue(columnName, type, columnValue, "SELECT * FROM VALUES ('" + resultValue + "')");
     }
 
-    private void assertQueryWithOneStringValue(final String columnName, final int type, final String columnValue,
+    @CsvSource({ "1111-01-01, 1111-01-01", //
+            "2019-12-3, 2019-12-03", //
+            "2019-5-02, 2019-05-02" //
+    })
+    @ParameterizedTest
+    void testRewriteWithDateValues(final java.sql.Date columnValue, final String resultValue)
+            throws AdapterException, SQLException {
+        final String columnName = "col";
+        final int type = Types.DATE;
+        when(this.mockResultSet.getDate(eq(columnName), any(Calendar.class))).thenReturn(columnValue);
+        assertQueryWithOneColumn(columnName, type, null, "SELECT * FROM VALUES (CAST('" + resultValue + "' AS DATE))");
+    }
+
+    @CsvSource({ "22222.2222, 22222.2222", //
+            "-99999999.99999999, -9.999999999999999E7", //
+            "99999999.99999999, 9.999999999999999E7", //
+            "99999999.99999999, 9.999999999999999E7", //
+            "11.5, 11.5", //
+            "42, 42.0" })
+    @ParameterizedTest
+    void testRewriteWithNumeric(final Double columnValue, final String resultValue)
+            throws AdapterException, SQLException {
+        final String columnName = "col";
+        final int type = Types.NUMERIC;
+        when(this.mockResultSet.getDouble(columnName)).thenReturn(columnValue);
+        assertQueryWithOneColumn(columnName, type, null, "SELECT * FROM VALUES (" + resultValue + ")");
+    }
+
+    private void assertQueryWithOneColumn(final String columnName, final int type, final String typeName,
             final String query) throws SQLException, AdapterException {
         when(this.mockResultSetMetaData.getColumnName(1)).thenReturn(columnName);
-        when(this.mockResultSet.getString(columnName)).thenReturn(columnValue);
         when(this.mockResultSetMetaData.getColumnType(1)).thenReturn(type);
+        when(this.mockResultSetMetaData.getColumnTypeName(1)).thenReturn(typeName);
         when(this.mockResultSetMetaData.getColumnCount()).thenReturn(1);
         when(this.mockResultSet.next()).thenReturn(true, false);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
                 equalTo(query));
+    }
+
+    private void assertQueryWithOneStringValue(final String columnName, final int type, final String columnValue,
+            final String query) throws SQLException, AdapterException {
+        when(this.mockResultSet.getString(columnName)).thenReturn(columnValue);
+        assertQueryWithOneColumn(columnName, type, null, query);
     }
 
     @Test
@@ -121,23 +157,44 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
         assertQueryWithOneStringValue("bigint_col", Types.BIGINT, "123456", "SELECT * FROM VALUES (123456)");
     }
 
-    @CsvSource({ "1111-01-01 12:10:09.000000, 01.01.1111 12:10:09.000", //
-            "1111-1-1 12:10:9.000000, 01.01.1111 12:10:09.000", //
-            "1111-1-1 12:10:9, 01.01.1111 12:10:09", //
-            "1111-1-1 12:10:9.1, 01.01.1111 12:10:09.100", //
-            "1111-1-1 12:10:9.12, 01.01.1111 12:10:09.120", //
-            "1111-1-1 12:10:9.123, 01.01.1111 12:10:09.123", //
-            "1111-1-1 12:10:9.1234, 01.01.1111 12:10:09.123", //
-            "1111-1-1 12:10:9.1239, 01.01.1111 12:10:09.124", //
-            "1111-1-1 12:10:9.12345, 01.01.1111 12:10:09.123", //
-            "1111-1-1 12:10:9.123666, 01.01.1111 12:10:09.124", //
-            "1111-1-1T1:2:30, 01.01.1111 01:02:30" //
+    @Test
+    void testRewriteWithInteger() throws AdapterException, SQLException {
+        assertQueryWithOneStringValue("int_col", Types.INTEGER, "123456", "SELECT * FROM VALUES (123456)");
+    }
+
+    @CsvSource({ "1111-01-01T12:10:09.000000Z, 1111-01-01 12:10:09.000", //
+            "1111-01-01T12:10:09.000000Z, 1111-01-01 12:10:09.000", //
+            "1111-01-01T12:10:09Z, 1111-01-01 12:10:09.000", //
+            "1111-01-01T12:10:09.1Z, 1111-01-01 12:10:09.100", //
+            "1111-01-01T12:10:09.12Z, 1111-01-01 12:10:09.120", //
+            "1111-01-01T12:10:09.123Z, 1111-01-01 12:10:09.123", //
+            "1111-01-01T12:10:09.1234Z, 1111-01-01 12:10:09.123", //
+            "1111-01-01T12:10:09.1239Z, 1111-01-01 12:10:09.123", //
+            "1111-01-01T12:10:09.12345Z, 1111-01-01 12:10:09.123", //
+            "1111-01-01T12:10:09.123666Z, 1111-01-01 12:10:09.123", //
+            "1111-01-01T01:02:30Z, 1111-01-01 01:02:30.000" //
     })
     @ParameterizedTest
-    void testRewriteWithDatetime(final String valueToConvert, final String expectedValue)
+    void testRewriteWithDatetime(final Instant valueToConvert, final String expectedValue)
             throws AdapterException, SQLException {
-        assertQueryWithOneStringValue("timestamp", 93, valueToConvert,
-                "SELECT * FROM VALUES ('" + expectedValue + "')");
+        when(this.mockResultSet.getTimestamp(eq("col_timestamp"), any(Calendar.class)))
+                .thenReturn(new Timestamp(valueToConvert.toEpochMilli()));
+        assertQueryWithOneColumn("col_timestamp", Types.TIMESTAMP, null,
+                "SELECT * FROM VALUES (CAST ('" + expectedValue + "' AS TIMESTAMP))");
+    }
+
+    @Test
+    void testRewriteWithGeography() throws AdapterException, SQLException {
+        when(this.mockResultSet.getString("col")).thenReturn("POINT(1 2)");
+        assertQueryWithOneColumn("col", Types.VARCHAR, "GEOGRAPHY",
+                "SELECT * FROM VALUES (CAST ('POINT(1 2)' AS GEOMETRY))");
+    }
+
+    @Test
+    void testRewriteWithNullGeography() throws AdapterException, SQLException {
+        when(this.mockResultSet.getString("col")).thenReturn(null);
+        when(this.mockResultSet.wasNull()).thenReturn(true);
+        assertQueryWithOneColumn("col", Types.VARCHAR, "GEOGRAPHY", "SELECT * FROM VALUES (CAST (NULL AS GEOMETRY))");
     }
 
     @Test
@@ -157,8 +214,8 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
                 equalTo("SELECT * FROM VALUES (1, 'foo', true), (2, 'bar', false), (3, 'cat', true)"));
     }
 
-    @ValueSource(ints = { Types.VARCHAR, Types.TIME, Types.VARBINARY, Types.NUMERIC })
-    @ParameterizedTest
+    @ValueSource(ints = { Types.VARCHAR, Types.TIME, Types.VARBINARY })
+    @ParameterizedTest(name = "Null value of type {0}")
     void testRewriteStringWithValueNull(final int type) throws AdapterException, SQLException {
         mockOneRowWithOneColumnOfType(type);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
@@ -173,6 +230,13 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     }
 
     @Test
+    void testRewriteNumericWithValueNull() throws AdapterException, SQLException {
+        mockOneRowWithOneColumnOfType(Types.NUMERIC);
+        assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
+                equalTo("SELECT * FROM VALUES (CAST (NULL AS DOUBLE))"));
+    }
+
+    @Test
     void testRewriteBigIntWithValueNull() throws AdapterException, SQLException {
         mockOneRowWithOneColumnOfType(Types.BIGINT);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
@@ -183,14 +247,14 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     void testRewriteTimestampWithValueNull() throws AdapterException, SQLException {
         mockOneRowWithOneColumnOfType(Types.TIMESTAMP);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
-                equalTo("SELECT * FROM VALUES (CAST (NULL AS VARCHAR(4)))"));
+                equalTo("SELECT * FROM VALUES (CAST (NULL AS TIMESTAMP))"));
     }
 
     @Test
     void testRewriteDateWithValueNull() throws AdapterException, SQLException {
         mockOneRowWithOneColumnOfType(Types.DATE);
         assertThat(this.queryRewriter.rewrite(this.statement, this.exaMetadata, AdapterProperties.emptyProperties()),
-                equalTo("SELECT * FROM VALUES (CAST (NULL AS VARCHAR(4)))"));
+                equalTo("SELECT * FROM VALUES (CAST (NULL AS DATE))"));
     }
 
     @Test
