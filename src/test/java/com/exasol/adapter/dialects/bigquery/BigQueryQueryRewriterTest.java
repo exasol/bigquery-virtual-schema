@@ -177,9 +177,9 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @ParameterizedTest
     void testRewriteWithDatetime(final Instant valueToConvert, final String expectedValue)
             throws AdapterException, SQLException {
-        when(this.mockResultSet.getTimestamp(eq("timestamp"), any(Calendar.class)))
+        when(this.mockResultSet.getTimestamp(eq("col_timestamp"), any(Calendar.class)))
                 .thenReturn(new Timestamp(valueToConvert.toEpochMilli()));
-        assertQueryWithOneColumn("timestamp", Types.TIMESTAMP, null,
+        assertQueryWithOneColumn("col_timestamp", Types.TIMESTAMP, null,
                 "SELECT * FROM VALUES (CAST ('" + expectedValue + "' AS TIMESTAMP))");
     }
 
