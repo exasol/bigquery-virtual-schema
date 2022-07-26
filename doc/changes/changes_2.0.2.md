@@ -1,4 +1,4 @@
-# Virtual Schema for BigQuery 2.0.2, released 2022-??-??
+# Virtual Schema for BigQuery 2.0.2, released 2022-07-26
 
 Code name: Fix data type conversion
 
@@ -13,7 +13,7 @@ It also fixes the following vulnerabilities by updating dependencies:
 
 ## Bugfixes
 
-* #7: Fixed conversion of BigQuery data types DATE, ....
+* #7: Fixed conversion of BigQuery data types DATE, TIMESTAMP, DATETIME and GEOGRAPHY.
 
 ## Dependency Updates
 
