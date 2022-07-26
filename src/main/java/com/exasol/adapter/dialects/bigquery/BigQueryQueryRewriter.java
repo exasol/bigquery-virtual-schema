@@ -28,11 +28,11 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
     private static final String CAST_NULL_AS_VARCHAR_4 = CAST + " (NULL AS VARCHAR(4))";
 
     private static final ZoneId UTC_TIMEZONE_ID = ZoneId.of("UTC");
-    private static final Calendar UTC_CALENDAR = Calendar.getInstance(TimeZone.getTimeZone(UTC_TIMEZONE_ID));
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
             .withZone(UTC_TIMEZONE_ID);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             .withZone(UTC_TIMEZONE_ID);
+    private final Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone(UTC_TIMEZONE_ID));
 
     /**
      * Create a new instance of the {@link BigQueryQueryRewriter}.
@@ -182,7 +182,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
 
     private void appendDate(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
-        final Date date = resultSet.getDate(columnName, UTC_CALENDAR);
+        final Date date = resultSet.getDate(columnName, utcCalendar);
         if (date == null) {
             builder.append(CAST + " (NULL AS DATE)");
         } else {
@@ -192,7 +192,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
 
     private void appendTimestamp(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
-        final Timestamp timestamp = resultSet.getTimestamp(columnName, UTC_CALENDAR);
+        final Timestamp timestamp = resultSet.getTimestamp(columnName, utcCalendar);
         if (timestamp == null) {
             builder.append(CAST + " (NULL AS TIMESTAMP)");
         } else {
