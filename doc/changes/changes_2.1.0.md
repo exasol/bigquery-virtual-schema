@@ -1,4 +1,4 @@
-# Virtual Schema for BigQuery 2.1.0, released 2022-??-??
+# Virtual Schema for BigQuery 2.1.0, released 2022-10-25
 
 Code name: Updated dependencies
 
@@ -10,7 +10,7 @@ Updated dependencies to fix vulnerabilities and changed error code prefix from `
 
 * #11: Removed individual system property `test.vs-logs` and unconditional activation of `LOG_LEVEL=ALL` in favor of default system properties supported by [test-db-builder-java](https://github.com/exasol/test-db-builder-java), see [TDBJ User Guide](https://github.com/exasol/test-db-builder-java/blob/main/doc/user_guide/user_guide.md#debug-output).
 * #13 Updated to latest version of virtual-schema-common-jdbc providing enhanced data type detection of result sets in import statements. However there is no additional benefit as BigQuery uses `SELECT FROM VALUES`.
-* #10:  Changed error code prefix from `VS-BIGQ` to `VSBIGQ`.
+* #10: Changed error code prefix from `VS-BIGQ` to `VSBIGQ`.
 
 ## Fixed vulnerabilities
 

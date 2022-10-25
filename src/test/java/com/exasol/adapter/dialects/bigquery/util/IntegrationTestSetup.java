@@ -138,7 +138,6 @@ public class IntegrationTestSetup implements AutoCloseable {
      * <li>{@code com.exasol.virtualschema.debug.level}</li>
      * </ul>
      *
-     *
      * @return additional individual properties for virtual schema
      */
     private Map<String, String> getVirtualSchemaProperties() {
