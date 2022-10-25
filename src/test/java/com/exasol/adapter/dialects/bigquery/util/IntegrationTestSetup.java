@@ -21,7 +21,7 @@ import com.google.cloud.bigquery.BigQuery;
 
 public class IntegrationTestSetup implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(IntegrationTestSetup.class.getName());
-    private static final String ADAPTER_JAR = "virtual-schema-dist-9.0.5-bigquery-2.0.2.jar";
+    private static final String ADAPTER_JAR = "virtual-schema-dist-10.0.1-bigquery-2.1.0.jar";
     public static final String BUCKETFS_ROOT_PATH = "/buckets/bfsdefault/default/";
     public static final Path ADAPTER_JAR_LOCAL_PATH = Path.of("target", ADAPTER_JAR);
 
@@ -82,9 +82,9 @@ public class IntegrationTestSetup implements AutoCloseable {
 
     public ConnectionDefinition createConnectionDefinition() {
         final ServiceAddress bigQueryServiceAddress = this.exasolTestSetup
-                .makeTcpServiceAccessibleFromDatabase(bigQueryTestSetup.getServiceAddress());
+                .makeTcpServiceAccessibleFromDatabase(this.bigQueryTestSetup.getServiceAddress());
         return this.exasolObjectFactory.createConnectionDefinition("BIGQUERY_CONNECTION",
-                bigQueryTestSetup.getJdbcUrl(getBucket(), bigQueryServiceAddress), "", "");
+                this.bigQueryTestSetup.getJdbcUrl(getBucket(), bigQueryServiceAddress), "", "");
     }
 
     AdapterScript createAdapterScript(final ExasolSchema adapterSchema)
@@ -127,17 +127,27 @@ public class IntegrationTestSetup implements AutoCloseable {
         return virtualSchema;
     }
 
+    /**
+     * {@link VirtualSchema} constructor will automatically set properties {@code DEBUG_ADDRESS} and {@code LOG_LEVEL}
+     * if the corresponding system properties are set, see <a href=
+     * "https://github.com/exasol/test-db-builder-java/blob/main/doc/user_guide/user_guide.md#debug-output">test-db-builder-java/user
+     * guide</a>.
+     * <ul>
+     * <li>{@code com.exasol.virtualschema.debug.host}</li>
+     * <li>{@code com.exasol.virtualschema.debug.port}</li>
+     * <li>{@code com.exasol.virtualschema.debug.level}</li>
+     * </ul>
+     *
+     *
+     * @return additional individual properties for virtual schema
+     */
     private Map<String, String> getVirtualSchemaProperties() {
         final Map<String, String> properties = new HashMap<>();
         properties.put("CATALOG_NAME", this.bigQueryDataset.getDatasetId().getProject());
-        properties.put("LOG_LEVEL", "ALL");
         final String debugProperty = System.getProperty("test.debug", "");
         final String profileProperty = System.getProperty("test.jprofiler", "");
         if (!debugProperty.isBlank() || !profileProperty.isBlank()) {
             properties.put("MAX_PARALLEL_UDFS", "1");
-        }
-        if (System.getProperty("test.vs-logs", "false").equals("true")) {
-            properties.put("DEBUG_ADDRESS", "127.0.0.1:3001");
         }
         return properties;
     }
@@ -151,11 +161,11 @@ public class IntegrationTestSetup implements AutoCloseable {
     }
 
     public Connection getConnection() {
-        return connection;
+        return this.connection;
     }
 
     public Statement getStatement() {
-        return statement;
+        return this.statement;
     }
 
     public Bucket getBucket() {

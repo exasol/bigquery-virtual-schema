@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>bigquery-virtual-schema</artifactId>
-    <version>2.0.2</version>
+    <version>2.1.0</version>
     <name>Virtual Schema for BigQuery</name>
     <description>Virtual Schema for connecting Big Query as a data source to Exasol</description>
     <distributionManagement>
@@ -17,7 +17,7 @@
         </snapshotRepository>
     </distributionManagement>
     <properties>
-        <vscjdbc.version>9.0.5</vscjdbc.version>
+        <vscjdbc.version>10.0.1</vscjdbc.version>
     </properties>
     <repositories>
         <repository>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>error-reporting-java</artifactId>
-            <version>0.4.1</version>
+            <version>1.0.0</version>
         </dependency>
         <!-- Unit test dependencies -->
         <dependency>
@@ -63,26 +63,26 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.8.2</version>
+            <version>5.9.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.6.1</version>
+            <version>4.8.1</version>
             <scope>test</scope>
         </dependency>
         <!-- Integration test dependencies -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.17.3</version>
+            <version>1.17.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
-            <version>1.17.3</version>
+            <version>1.17.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -94,7 +94,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>3.3.3</version>
+            <version>3.4.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -106,27 +106,20 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>hamcrest-resultset-matcher</artifactId>
-            <version>1.5.1  </version>
+            <version>1.5.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
-            <version>2.14.0</version>
+            <version>2.17.1</version>
             <scope>test</scope>
         </dependency>
-        <!-- Upgade transitive dependency of google-cloud-bigquery to fix CVE-2022-24823 -->
+        <!-- Upgrade transitive dependency of google-cloud-bigquery to fix CVE-2022-42003 -->
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-common</artifactId>
-            <version>4.1.79.Final</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Upgrade transtivie dependency of com.google.cloud:google-cloud-bigquery to fix https://ossindex.sonatype.org/vulnerability/sonatype-2021-0818 -->
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-core</artifactId>
-            <version>1.48.0</version>
+            <groupId> com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.13.4.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -151,7 +144,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>2.5.0</version>
+                <version>2.8.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -164,7 +157,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <!-- Fix failing integration tests: 
+                    <!-- Fix failing integration tests:
                         java.lang.module.ResolutionException: Module org.glassfish.jakarta.json contains package jakarta.json.stream, module jakarta.json exports package jakarta.json.stream to org.glassfish.jakarta.json -->
                     <useModulePath>false</useModulePath>
                 </configuration>
@@ -177,27 +170,24 @@
                         <!-- Transitive test dependency io.netty:netty-handler:4.1.77 used by software.amazon.awssdk:cloudformation -->
                         <!-- We are not affected, see https://github.com/aws/aws-sdk-java-v2/issues/3263 for details -->
                         <exclude>sonatype-2020-0026</exclude>
-
-                        <!-- Transitive test dependency io.grpc:grpc-core:jar:1.48.0 used by com.google.cloud:google-cloud-bigquery -->
+                        <!-- Transitive test dependency com.google.guava:guava:jar:31.1 used by com.google.cloud:google-cloud-bigquery -->
                         <!-- https://ossindex.sonatype.org/vulnerability/sonatype-2020-0926: Creation of Temporary File in Directory with Incorrect Permissions-->
                         <!-- This is only used in tests, production code is not affected. -->
                         <exclude>sonatype-2020-0926</exclude>
-
-                        <!-- Transitive test dependency io.grpc:grpc-core:jar:1.48.0 used by com.google.cloud:google-cloud-bigquery -->
+                        <!-- Transitive test dependency io.grpc:grpc-core:jar:1.49.2 used by com.google.cloud:google-cloud-bigquery -->
                         <!-- https://ossindex.sonatype.org/vulnerability/sonatype-2021-0818: Improper Resource Shutdown or Release -->
                         <!-- This is only used in tests, production code is not affected. -->
                         <exclude>sonatype-2021-0818</exclude>
                     </excludeVulnerabilityIds>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
     <url>https://github.com/exasol/bigquery-virtual-schema/</url>
     <parent>
         <artifactId>bigquery-virtual-schema-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>2.0.2</version>
+        <version>2.1.0</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
