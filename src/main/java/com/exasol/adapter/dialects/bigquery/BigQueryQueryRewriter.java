@@ -17,6 +17,7 @@ import com.exasol.adapter.dialects.rewriting.ImportIntoTemporaryTableQueryRewrit
 import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.sql.SqlStatement;
 
 /**
@@ -47,8 +48,8 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
     }
 
     @Override
-    public String rewrite(final SqlStatement statement, final ExaMetadata exaMetadata,
-            final AdapterProperties properties) throws AdapterException, SQLException {
+    public String rewrite(final SqlStatement statement, final List<DataType> selectListDataTypes,
+            final ExaMetadata exaMetadata, final AdapterProperties properties) throws AdapterException, SQLException {
         final String query = getQueryFromStatement(statement, properties);
         LOGGER.fine(() -> "Query to rewrite: " + query);
         final StringBuilder builder = new StringBuilder();
@@ -183,7 +184,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
 
     private void appendDate(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
-        final Date date = resultSet.getDate(columnName, utcCalendar);
+        final Date date = resultSet.getDate(columnName, this.utcCalendar);
         if (date == null) {
             builder.append(CAST + " (NULL AS DATE)");
         } else {
@@ -193,7 +194,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
 
     private void appendTimestamp(final StringBuilder builder, final ResultSet resultSet, final String columnName)
             throws SQLException {
-        final Timestamp timestamp = resultSet.getTimestamp(columnName, utcCalendar);
+        final Timestamp timestamp = resultSet.getTimestamp(columnName, this.utcCalendar);
         if (timestamp == null) {
             builder.append(CAST + " (NULL AS TIMESTAMP)");
         } else {
