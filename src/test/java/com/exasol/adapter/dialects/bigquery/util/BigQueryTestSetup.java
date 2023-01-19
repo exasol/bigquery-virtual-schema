@@ -1,9 +1,9 @@
 package com.exasol.adapter.dialects.bigquery.util;
 
+import java.net.InetSocketAddress;
 import java.nio.file.Paths;
 
 import com.exasol.bucketfs.Bucket;
-import com.exasol.exasoltestsetup.ServiceAddress;
 import com.google.cloud.bigquery.BigQuery;
 
 public interface BigQueryTestSetup extends AutoCloseable {
@@ -18,11 +18,11 @@ public interface BigQueryTestSetup extends AutoCloseable {
 
     BigQuery getClient();
 
-    ServiceAddress getServiceAddress();
+    InetSocketAddress getServiceAddress();
 
     String getProjectId();
 
-    String getJdbcUrl(Bucket bucket, ServiceAddress serviceAddress);
+    String getJdbcUrl(Bucket bucket, InetSocketAddress serviceAddress);
 
     void start();
 

@@ -1,13 +1,13 @@
 package com.exasol.adapter.dialects.bigquery.util;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeoutException;
 
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
-import com.exasol.exasoltestsetup.ServiceAddress;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.bigquery.BigQuery;
@@ -38,8 +38,8 @@ public class GoogleCloudBigQuerySetup implements BigQueryTestSetup {
     }
 
     @Override
-    public ServiceAddress getServiceAddress() {
-        return new ServiceAddress("www.googleapis.com", 443);
+    public InetSocketAddress getServiceAddress() {
+        return new InetSocketAddress("www.googleapis.com", 443);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class GoogleCloudBigQuerySetup implements BigQueryTestSetup {
     }
 
     @Override
-    public String getJdbcUrl(final Bucket bucket, final ServiceAddress serviceAddress) {
+    public String getJdbcUrl(final Bucket bucket, final InetSocketAddress serviceAddress) {
         final String url = "https://" + serviceAddress.getHostName() + ":" + serviceAddress.getPort();
         final String bucketFsCredentialsPath = uploadCredentials(bucket);
         return "jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;RootURL=" + url + ";ProjectId="

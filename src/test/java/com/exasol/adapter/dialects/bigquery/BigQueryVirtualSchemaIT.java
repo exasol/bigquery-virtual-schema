@@ -3,7 +3,6 @@ package com.exasol.adapter.dialects.bigquery;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -28,7 +27,6 @@ class BigQueryVirtualSchemaIT {
 
     @BeforeAll
     static void beforeAll() {
-        assumeTrue(CONFIG.hasGoogleCloudCredentials(), "Local bigquery emulator not yet supported");
         setup = IntegrationTestSetup.create(CONFIG);
     }
 

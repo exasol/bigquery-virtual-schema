@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.bigquery.util;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.sql.*;
@@ -15,13 +16,14 @@ import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.dbbuilder.dialects.DatabaseObject;
 import com.exasol.dbbuilder.dialects.exasol.*;
-import com.exasol.exasoltestsetup.*;
+import com.exasol.exasoltestsetup.ExasolTestSetup;
+import com.exasol.exasoltestsetup.ExasolTestSetupFactory;
 import com.exasol.udfdebugging.UdfTestSetup;
 import com.google.cloud.bigquery.BigQuery;
 
 public class IntegrationTestSetup implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(IntegrationTestSetup.class.getName());
-    private static final String ADAPTER_JAR = "virtual-schema-dist-10.0.1-bigquery-2.1.0.jar";
+    private static final String ADAPTER_JAR = "virtual-schema-dist-10.1.0-bigquery-2.1.1.jar";
     public static final String BUCKETFS_ROOT_PATH = "/buckets/bfsdefault/default/";
     public static final Path ADAPTER_JAR_LOCAL_PATH = Path.of("target", ADAPTER_JAR);
 
@@ -81,8 +83,8 @@ public class IntegrationTestSetup implements AutoCloseable {
     }
 
     public ConnectionDefinition createConnectionDefinition() {
-        final ServiceAddress bigQueryServiceAddress = this.exasolTestSetup
-                .makeTcpServiceAccessibleFromDatabase(this.bigQueryTestSetup.getServiceAddress());
+        final InetSocketAddress bigQueryServiceAddress = this.exasolTestSetup
+                .makeTcpServiceAccessibleFromDatabase(bigQueryTestSetup.getServiceAddress());
         return this.exasolObjectFactory.createConnectionDefinition("BIGQUERY_CONNECTION",
                 this.bigQueryTestSetup.getJdbcUrl(getBucket(), bigQueryServiceAddress), "", "");
     }
@@ -99,7 +101,7 @@ public class IntegrationTestSetup implements AutoCloseable {
     private String[] getAdapterJarsInBucketFs() {
         final JdbcDriverProvider uploader = new JdbcDriverProvider(getBucket());
         final List<String> jarFiles = uploader.uploadJdbcDriverToBucketFs(
-                "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.2.25.1029.zip");
+                "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.3.0.1001.zip");
         final List<String> jars = new ArrayList<>();
         jars.add(BUCKETFS_ROOT_PATH + ADAPTER_JAR);
         jars.addAll(jarFiles);

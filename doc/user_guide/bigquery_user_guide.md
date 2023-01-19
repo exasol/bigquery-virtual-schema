@@ -34,7 +34,7 @@ List all the JAR files from the JDBC driver.
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_BIGQUERY AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-10.0.1-bigquery-2.1.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-10.1.0-bigquery-2.1.1.jar;
     %jar /buckets/<BFS service>/<bucket>/GoogleBigQueryJDBC42.jar;
     ...
     ...
