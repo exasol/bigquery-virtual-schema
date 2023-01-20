@@ -63,8 +63,7 @@ class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContain
 
     @Override
     public String getJdbcUrl(final Bucket bucket, final InetSocketAddress serviceAddress) {
-        final String hostAndPort = serviceAddress.toString();
-        final String url = "http://" + hostAndPort;
+        final String url = "http://" + serviceAddress.getHostName() + ":" + serviceAddress.getPort();
         return "jdbc:bigquery://" + url + ";ProjectId=" + getProjectId() //
                 + ";RootURL=" + url //
                 + ";OAuthType=2;OAuthAccessToken=dummy-token";

@@ -85,8 +85,9 @@ public class IntegrationTestSetup implements AutoCloseable {
     public ConnectionDefinition createConnectionDefinition() {
         final InetSocketAddress bigQueryServiceAddress = this.exasolTestSetup
                 .makeTcpServiceAccessibleFromDatabase(bigQueryTestSetup.getServiceAddress());
-        return this.exasolObjectFactory.createConnectionDefinition("BIGQUERY_CONNECTION",
-                this.bigQueryTestSetup.getJdbcUrl(getBucket(), bigQueryServiceAddress), "", "");
+        final String jdbcUrl = this.bigQueryTestSetup.getJdbcUrl(getBucket(), bigQueryServiceAddress);
+        LOGGER.fine(() -> "Creating JDBC connection to URL " + jdbcUrl);
+        return this.exasolObjectFactory.createConnectionDefinition("BIGQUERY_CONNECTION", jdbcUrl, "", "");
     }
 
     AdapterScript createAdapterScript(final ExasolSchema adapterSchema)
@@ -122,7 +123,6 @@ public class IntegrationTestSetup implements AutoCloseable {
         final VirtualSchema virtualSchema = this.exasolObjectFactory.createVirtualSchemaBuilder(schemaName)
                 .connectionDefinition(this.connectionDefinition) //
                 .adapterScript(this.adapterScript) //
-                .connectionDefinition(this.connectionDefinition) //
                 .sourceSchemaName(this.bigQueryDataset.getDatasetId().getDataset()) //
                 .properties(getVirtualSchemaProperties()).build();
         this.createdObjects.add(virtualSchema);
