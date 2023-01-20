@@ -60,7 +60,7 @@ CREATE OR REPLACE CONNECTION BIGQUERY_JDBC_CONNECTION
 TO 'jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=<your project id>;OAuthType=0;OAuthServiceAcctEmail=<service account email>;OAuthPvtKeyPath=/<path to the bucket>/<name of the key file>';
 ```
 
-You can find additional information about the JDBC connection URL [in the Big Query JDBC installation guide](https://storage.googleapis.com/simba-bq-release/jdbc/Simba%20Google%20BigQuery%20JDBC%20Connector%20Install%20and%20Configuration%20Guide.pdf).
+You can find additional information about the JDBC connection URL [in the Big Query JDBC installation guide](https://storage.googleapis.com/simba-bq-release/jdbc/Simba%20Google%20BigQuery%20JDBC%20Connector%20Install%20and%20Configuration%20Guide_1.3.0.1001.pdf).
 
 ## Creating a Virtual Schema
 
