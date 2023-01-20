@@ -1,8 +1,10 @@
 # Virtual Schema for BigQuery 2.1.1, released 2023-??-??
 
-Code name:
+Code name: Dependency updates on top of 2.1.1
 
 ## Summary
+
+This release contains dependency updates on top of 2.1.1
 
 ## Features
 
