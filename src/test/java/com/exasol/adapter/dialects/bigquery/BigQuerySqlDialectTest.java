@@ -128,7 +128,7 @@ class BigQuerySqlDialectTest {
         assertThat(this.dialect.getSupportedProperties(),
                 containsInAnyOrder(CONNECTION_NAME_PROPERTY, CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY,
                         TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
-                        LOG_LEVEL_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY));
+                        LOG_LEVEL_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY, "IMPORT_DATA_TYPES"));
     }
 
     @CsvSource({ "5Customers, `5Customers`", //

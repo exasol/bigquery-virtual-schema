@@ -1,40 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>bigquery-virtual-schema</artifactId>
-    <version>2.1.0</version>
+    <version>2.1.1</version>
     <name>Virtual Schema for BigQuery</name>
     <description>Virtual Schema for connecting Big Query as a data source to Exasol</description>
-    <distributionManagement>
-        <repository>
-            <id>maven.exasol.com</id>
-            <url>https://maven.exasol.com/artifactory/exasol-releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>maven.exasol.com</id>
-            <url>https://maven.exasol.com/artifactory/exasol-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
     <properties>
-        <vscjdbc.version>10.0.1</vscjdbc.version>
+        <vscjdbc.version>10.1.0</vscjdbc.version>
     </properties>
-    <repositories>
-        <repository>
-            <id>maven.exasol.com</id>
-            <url>https://maven.exasol.com/artifactory/exasol-releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>maven.exasol.com-snapshots</id>
-            <url>https://maven.exasol.com/artifactory/exasol-snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     <dependencies>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -63,44 +39,44 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.9.1</version>
+            <version>5.9.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.8.1</version>
+            <version>5.0.0</version>
             <scope>test</scope>
         </dependency>
         <!-- Integration test dependencies -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.17.5</version>
+            <version>1.17.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
-            <version>1.17.5</version>
+            <version>1.17.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-test-setup-abstraction-java</artifactId>
-            <version>0.3.2</version>
+            <version>2.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>3.4.1</version>
+            <version>3.4.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>udf-debugging-java</artifactId>
-            <version>0.6.4</version>
+            <version>0.6.7</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -112,14 +88,14 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
-            <version>2.17.1</version>
+            <version>2.20.2</version>
             <scope>test</scope>
         </dependency>
         <!-- Upgrade transitive dependency of google-cloud-bigquery to fix CVE-2022-42003 -->
         <dependency>
-            <groupId> com.fasterxml.jackson.core</groupId>
+            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.13.4.2</version>
+            <version>2.14.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -144,7 +120,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>2.8.0</version>
+                <version>2.9.1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -158,7 +134,9 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
                     <!-- Fix failing integration tests:
-                        java.lang.module.ResolutionException: Module org.glassfish.jakarta.json contains package jakarta.json.stream, module jakarta.json exports package jakarta.json.stream to org.glassfish.jakarta.json -->
+                        java.lang.module.ResolutionException:
+                    Module org.glassfish.jakarta.json contains package jakarta.json.stream, module
+                    jakarta.json exports package jakarta.json.stream to org.glassfish.jakarta.json -->
                     <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
@@ -167,17 +145,33 @@
                 <artifactId>ossindex-maven-plugin</artifactId>
                 <configuration>
                     <excludeVulnerabilityIds>
-                        <!-- Transitive test dependency io.netty:netty-handler:4.1.77 used by software.amazon.awssdk:cloudformation -->
-                        <!-- We are not affected, see https://github.com/aws/aws-sdk-java-v2/issues/3263 for details -->
+                        <!-- Transitive test dependency io.netty:netty-handler:4.1.77 used by
+                        software.amazon.awssdk:cloudformation -->
+                        <!-- We are not affected, see
+                        https://github.com/aws/aws-sdk-java-v2/issues/3263 for details -->
                         <exclude>sonatype-2020-0026</exclude>
-                        <!-- Transitive test dependency com.google.guava:guava:jar:31.1 used by com.google.cloud:google-cloud-bigquery -->
-                        <!-- https://ossindex.sonatype.org/vulnerability/sonatype-2020-0926: Creation of Temporary File in Directory with Incorrect Permissions-->
+                        <!-- Transitive test dependency com.google.guava:guava:jar:31.1 used by
+                        com.google.cloud:google-cloud-bigquery -->
+                        <!-- https://ossindex.sonatype.org/vulnerability/sonatype-2020-0926:
+                        Creation of Temporary File in Directory with Incorrect Permissions-->
                         <!-- This is only used in tests, production code is not affected. -->
                         <exclude>sonatype-2020-0926</exclude>
-                        <!-- Transitive test dependency io.grpc:grpc-core:jar:1.49.2 used by com.google.cloud:google-cloud-bigquery -->
-                        <!-- https://ossindex.sonatype.org/vulnerability/sonatype-2021-0818: Improper Resource Shutdown or Release -->
+                        <!-- Transitive test dependency io.grpc:grpc-core:jar:1.49.2 used by
+                        com.google.cloud:google-cloud-bigquery -->
+                        <!-- https://ossindex.sonatype.org/vulnerability/sonatype-2021-0818:
+                        Improper Resource Shutdown or Release -->
                         <!-- This is only used in tests, production code is not affected. -->
                         <exclude>sonatype-2021-0818</exclude>
+                        <!-- Transitive dependency fr.turri:aXMLRPC used by
+                        com.exasol:bucketfs-java.
+                        CVE-2020-36641 is reported
+                        to be fixed in aXMLRPC 1.12.1. We use version 1.13.0,
+                        so
+                        this is a false positive. -->
+                        <exclude>CVE-2020-36641</exclude>
+                        <!-- com.fasterxml.jackson.core:jackson-core:jar:2.14.1 used by
+                        com.google.cloud:google-cloud-bigquery is only used for testing. -->
+                        <exclude>sonatype-2022-6438</exclude>
                     </excludeVulnerabilityIds>
                 </configuration>
             </plugin>
@@ -187,7 +181,7 @@
     <parent>
         <artifactId>bigquery-virtual-schema-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>2.1.0</version>
+        <version>2.1.1</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>

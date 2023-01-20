@@ -43,8 +43,10 @@ class JdbcDriverProvider {
 
     private void uploadToBucketFs(final Path localFile, final String fileName) {
         try {
-            if (!bucket.listContents().contains(fileName.toString())) {
-                bucket.uploadFile(localFile, "/");
+            if (!bucket.listContents().contains(fileName)) {
+                final String pathInBucket = "/" + fileName;
+                LOGGER.fine(() -> "Uploading " + localFile + " to bucket at " + pathInBucket);
+                bucket.uploadFile(localFile, pathInBucket);
             }
         } catch (FileNotFoundException | BucketAccessException | TimeoutException exception) {
             throw new IllegalStateException("Error uploading to bucketfs", exception);
