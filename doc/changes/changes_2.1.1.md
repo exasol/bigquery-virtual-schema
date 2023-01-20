@@ -18,7 +18,7 @@ Code name:
 
 * Updated `com.exasol:exasol-test-setup-abstraction-java:0.3.2` to `2.0.0`
 * Updated `com.exasol:test-db-builder-java:3.4.1` to `3.4.2`
-* Updated `com.exasol:udf-debugging-java:0.6.4` to `0.6.6`
+* Updated `com.exasol:udf-debugging-java:0.6.4` to `0.6.7`
 * Updated `com.exasol:virtual-schema-common-jdbc:10.0.1` to `10.1.0`
 * Updated `com.fasterxml.jackson.core:jackson-databind:2.13.4.2` to `2.14.1`
 * Updated `com.google.cloud:google-cloud-bigquery:2.17.1` to `2.20.2`

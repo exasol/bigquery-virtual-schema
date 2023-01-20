@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>bigquery-virtual-schema</artifactId>
@@ -74,7 +76,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>udf-debugging-java</artifactId>
-            <version>0.6.6</version>
+            <version>0.6.7</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -96,23 +98,6 @@
             <version>2.14.1</version>
             <scope>test</scope>
         </dependency>
-        <!-- Upgade transitive dependency of google-cloud-bigquery to fix CVE-2022-24823
-        <dependency>
-                <groupId>io.netty</groupId>
-        <artifactId>netty-common</artifactId>
-                <version>4.1.79.Final</version>
-        <scope>test</scope>
-            </dependency>
-        -->
-        <!-- Upgrade transtivie dependency of com.google.cloud:google-cloud-bigquery to fix
-        https://ossindex.sonatype.org/vulnerability/sonatype-2021-0818 -->
-        <!-- <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-core</artifactId>
-        <version>1.48.0</version>
-            <scope>test</scope>
-        </dependency>
-    -->
     </dependencies>
     <build>
         <plugins>
