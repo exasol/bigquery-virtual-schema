@@ -9,7 +9,6 @@ import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 import static com.exasol.adapter.dialects.bigquery.BigQueryProperties.BIGQUERY_ENABLE_IMPORT_PROPERTY;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -35,7 +34,7 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.rewriting.ImportIntoTemporaryTableQueryRewriter;
 import com.exasol.adapter.jdbc.ConnectionFactory;
-import com.exasol.adapter.properties.PropertyValidationException;
+import com.exasol.adapter.properties.*;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -128,7 +127,8 @@ class BigQuerySqlDialectTest {
         assertThat(this.dialect.getSupportedProperties(),
                 containsInAnyOrder(CONNECTION_NAME_PROPERTY, CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY,
                         TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
-                        LOG_LEVEL_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY, "IMPORT_DATA_TYPES"));
+                        LOG_LEVEL_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY, TableCountLimit.MAXTABLES_PROPERTY,
+                        DataTypeDetection.STRATEGY_PROPERTY));
     }
 
     @CsvSource({ "5Customers, `5Customers`", //
@@ -188,7 +188,7 @@ class BigQuerySqlDialectTest {
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
                 dialect::validateProperties);
         assertThat(exception.getMessage(),
-                containsString("The value 'WRONG VALUE' for the property 'BIGQUERY_ENABLE_IMPORT' is invalid."
-                        + " It has to be either 'true' or 'false' (case insensitive)"));
+                equalTo("E-VSCJDBC-15: The value 'WRONG VALUE' for property 'BIGQUERY_ENABLE_IMPORT' is invalid."
+                        + " It has to be either 'true' or 'false' (case insensitive)."));
     }
 }
