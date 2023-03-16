@@ -6,6 +6,8 @@ Code name: Dependency Upgrade on top of 2.1.1
 
 Updated dependencies to fix vulnerability CVE-2022-45688 in test dependency [org.json:json:jar:20220924](https://ossindex.sonatype.org/component/pkg:maven/org.json/json@20220924?utm_source=ossindex-client&utm_medium=integration&utm_content=1.8.1).
 
+Please note that updated dependency `virtual-schema-common-jdbc` adds support for a new adapter property [`MAX_TABLE_COUNT`](https://github.com/exasol/virtual-schema-common-jdbc#property-max_table_count) and fixes ambiguous results by escaping SQL wildcards such as underscore `_` and percent `%` in names of catalogs, schemas, and tables when retrieving column metadata from JDBC driver.
+
 ## Security
 
 * #18: Fixed vulnerabilities
