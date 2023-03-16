@@ -21,6 +21,7 @@ import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.dialects.rewriting.ImportIntoTemporaryTableQueryRewriter;
 import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.properties.BooleanProperty;
 import com.exasol.adapter.sql.AggregateFunction;
 import com.exasol.adapter.sql.ScalarFunction;
 
@@ -42,7 +43,8 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
      */
     public BigQuerySqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
         super(connectionFactory, properties,
-                Set.of(CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY));
+                Set.of(CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY), //
+                List.of(BooleanProperty.validator(BIGQUERY_ENABLE_IMPORT_PROPERTY)));
     }
 
     @Override
@@ -153,12 +155,6 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
     @Override
     public NullSorting getDefaultNullSorting() {
         return NullSorting.NULLS_SORTED_AT_END;
-    }
-
-    @Override
-    public void validateProperties() throws PropertyValidationException {
-        super.validateProperties();
-        validateBooleanProperty(BIGQUERY_ENABLE_IMPORT_PROPERTY);
     }
 
     @Override
