@@ -9,7 +9,7 @@ This release fixes conversions of the following BigQuery data types: DATE, TIMES
 It also fixes the following vulnerabilities by updating dependencies:
 
 * CVE-2022-24823
-* [sonatype-2021-0818](https://ossindex.sonatype.org/vulnerability/sonatype-2021-0818)
+* sonatype-2021-0818
 
 ## Bugfixes
 
