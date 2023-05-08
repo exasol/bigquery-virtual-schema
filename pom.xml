@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>bigquery-virtual-schema</artifactId>
-    <version>2.2.0</version>
+    <version>2.2.1</version>
     <name>Virtual Schema for BigQuery</name>
     <description>Virtual Schema for connecting Big Query as a data source to Exasol</description>
     <properties>
@@ -37,32 +37,32 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.9.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.2.0</version>
+            <version>5.3.1</version>
             <scope>test</scope>
         </dependency>
         <!-- Integration test dependencies -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.17.6</version>
+            <version>1.18.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
-            <version>1.17.6</version>
+            <version>1.18.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-test-setup-abstraction-java</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -80,20 +80,20 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>hamcrest-resultset-matcher</artifactId>
-            <version>1.5.2</version>
+            <version>1.6.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
-            <version>2.23.2</version>
+            <version>2.25.0</version>
             <scope>test</scope>
         </dependency>
         <!-- Upgrade transitive dependency of google-cloud-bigquery to fix CVE-2022-42003 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.14.2</version>
+            <version>2.15.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -118,7 +118,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>2.9.4</version>
+                <version>2.9.7</version>
                 <executions>
                     <execution>
                         <goals>
@@ -143,17 +143,12 @@
                 <artifactId>ossindex-maven-plugin</artifactId>
                 <configuration>
                     <excludeVulnerabilityIds>
-                        <!-- Transitive test dependency io.netty:netty-handler:4.1.77 used by
-                        software.amazon.awssdk:cloudformation -->
-                        <!-- We are not affected, see
-                        https://github.com/aws/aws-sdk-java-v2/issues/3263 for details -->
-                        <exclude>sonatype-2020-0026</exclude>
                         <!-- Transitive test dependency com.google.guava:guava:jar:31.1 used by
                         com.google.cloud:google-cloud-bigquery -->
                         <!-- https://ossindex.sonatype.org/vulnerability/sonatype-2020-0926:
                         Creation of Temporary File in Directory with Incorrect Permissions-->
                         <!-- This is only used in tests, production code is not affected. -->
-                        <exclude>sonatype-2020-0926</exclude>
+                        <exclude>CVE-2020-8908</exclude>
                         <!-- Transitive dependency fr.turri:aXMLRPC used by
                         com.exasol:bucketfs-java.
                         CVE-2020-36641 is reported
@@ -161,9 +156,6 @@
                         so
                         this is a false positive. -->
                         <exclude>CVE-2020-36641</exclude>
-                        <!-- com.fasterxml.jackson.core:jackson-core:jar:2.14.1 used by
-                        com.google.cloud:google-cloud-bigquery is only used for testing. -->
-                        <exclude>sonatype-2022-6438</exclude>
                     </excludeVulnerabilityIds>
                 </configuration>
             </plugin>
@@ -173,7 +165,7 @@
     <parent>
         <artifactId>bigquery-virtual-schema-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>2.2.0</version>
+        <version>2.2.1</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
