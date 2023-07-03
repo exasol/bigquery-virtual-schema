@@ -23,7 +23,7 @@ import com.google.cloud.bigquery.BigQuery;
 
 public class IntegrationTestSetup implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(IntegrationTestSetup.class.getName());
-    private static final String ADAPTER_JAR = "virtual-schema-dist-10.5.0-bigquery-2.2.1.jar";
+    private static final String ADAPTER_JAR = "virtual-schema-dist-10.5.0-bigquery-2.2.2.jar";
     public static final String BUCKETFS_ROOT_PATH = "/buckets/bfsdefault/default/";
     public static final Path ADAPTER_JAR_LOCAL_PATH = Path.of("target", ADAPTER_JAR);
 
