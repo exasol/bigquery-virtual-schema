@@ -14,9 +14,9 @@ import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 
 class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContainer> implements BigQueryTestSetup {
-    private static final Logger LOGGER = Logger.getLogger(IntegrationTestSetup.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(BigQueryEmulatorContainer.class.getName());
     private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName
-            .parse("ghcr.io/goccy/bigquery-emulator:0.2.12");
+            .parse("ghcr.io/goccy/bigquery-emulator:0.4.3");
     private static final int PORT = 9050;
     private static final String PROJECT_ID = "test";
     private Path dataYaml;
@@ -52,7 +52,7 @@ class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContain
     public BigQuery getClient() {
         final String url = getUrl();
         final String projectId = getProjectId();
-        LOGGER.fine("Connecting to bigquery at " + url + " with project id '" + projectId + "'");
+        LOGGER.fine(() -> "Connecting to bigquery at " + url + " with project id '" + projectId + "'");
         return BigQueryOptions.newBuilder().setHost(url).setLocation(url).setProjectId(projectId).build().getService();
     }
 

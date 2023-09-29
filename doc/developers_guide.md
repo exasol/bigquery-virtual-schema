@@ -31,5 +31,5 @@ As long as the emulator is not yet ready you need to manually enable it.
 For manual testing you can start the emulator with the following command:
 
 ```sh
-docker run --publish 9050:9050 --publish 9060:9060 ghcr.io/goccy/bigquery-emulator:0.2.12 --project=myProject --port=9050 --grpc-port=9060 --log-level=debug
+docker run --publish 9050:9050 --publish 9060:9060 ghcr.io/goccy/bigquery-emulator:0.4.3 --project=myProject --port=9050 --grpc-port=9060 --log-level=debug
 ```
