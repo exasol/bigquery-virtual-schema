@@ -10,7 +10,7 @@ This release fixes CVE-2023-42503 in test dependency `org.apache.commons:commons
 
 ## Security
 
-* #42: Fixed CVE-2023-42503 in test dependency `org.apache.commons:commons-compress`
+* #25: Fixed CVE-2023-42503 in test dependency `org.apache.commons:commons-compress`
 
 ## Dependency Updates
 
