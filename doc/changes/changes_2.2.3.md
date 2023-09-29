@@ -4,7 +4,9 @@ Code name: Fix CVE-2023-42503 in test dependency
 
 ## Summary
 
-This release fixes CVE-2023-42503 in test dependency `org.apache.commons:commons-compress`. The release also improves documentation by considering SQL clients other than DbVisualizer.
+This release fixes CVE-2023-42503 in test dependency `org.apache.commons:commons-compress`.
+
+**Known issue:** Transitive test dependency `io.netty:netty-handler` of `software.amazon.awssdk:cloudformation` contains vulnerability CVE-2023-4586 (CWE-300: Channel Accessible by Non-Endpoint ('Man-in-the-Middle') (6.5)). We assume that the AWS client's usage of netty-handler is not affected by the vulnerability.
 
 ## Security
 
