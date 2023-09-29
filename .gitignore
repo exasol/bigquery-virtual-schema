@@ -36,3 +36,4 @@ venv/
 *.flattened-pom.xml
 
 test.properties
+/.apt_generated_tests/

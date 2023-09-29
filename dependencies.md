@@ -37,7 +37,7 @@
 | [Maven Surefire Plugin][30]                             | [Apache-2.0][21]                               |
 | [Versions Maven Plugin][31]                             | [Apache License, Version 2.0][21]              |
 | [duplicate-finder-maven-plugin Maven Mojo][32]          | [Apache License 2.0][33]                       |
-| [Apache Maven Assembly Plugin][34]                      | [Apache License, Version 2.0][21]              |
+| [Apache Maven Assembly Plugin][34]                      | [Apache-2.0][21]                               |
 | [Apache Maven JAR Plugin][35]                           | [Apache License, Version 2.0][21]              |
 | [Artifact reference checker and unifier][36]            | [MIT License][37]                              |
 | [Project keeper maven plugin][38]                       | [The MIT License][39]                          |
@@ -61,7 +61,7 @@
 [7]: https://www.eclipse.org/legal/epl-v20.html
 [8]: https://github.com/mockito/mockito
 [9]: https://github.com/mockito/mockito/blob/main/LICENSE
-[10]: https://testcontainers.org
+[10]: https://java.testcontainers.org
 [11]: http://opensource.org/licenses/MIT
 [12]: https://github.com/exasol/exasol-test-setup-abstraction-java/
 [13]: https://github.com/exasol/exasol-test-setup-abstraction-java/blob/main/LICENSE
@@ -83,7 +83,7 @@
 [29]: http://www.apache.org/licenses/LICENSE-2.0.txt
 [30]: https://maven.apache.org/surefire/maven-surefire-plugin/
 [31]: https://www.mojohaus.org/versions/versions-maven-plugin/
-[32]: https://github.com/basepom/duplicate-finder-maven-plugin
+[32]: https://basepom.github.io/duplicate-finder-maven-plugin
 [33]: http://www.apache.org/licenses/LICENSE-2.0.html
 [34]: https://maven.apache.org/plugins/maven-assembly-plugin/
 [35]: https://maven.apache.org/plugins/maven-jar-plugin/
