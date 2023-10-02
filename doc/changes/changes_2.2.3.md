@@ -1,4 +1,4 @@
-# Virtual Schema for BigQuery 2.2.3, released 2023-09-29
+# Virtual Schema for BigQuery 2.2.3, released 2023-10-02
 
 Code name: Fix CVE-2023-42503 in test dependency
 
