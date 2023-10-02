@@ -23,7 +23,7 @@ import com.google.cloud.bigquery.BigQuery;
 
 public class IntegrationTestSetup implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(IntegrationTestSetup.class.getName());
-    private static final String ADAPTER_JAR = "virtual-schema-dist-10.5.0-bigquery-2.2.2.jar";
+    private static final String ADAPTER_JAR = "virtual-schema-dist-11.0.2-bigquery-2.2.3.jar";
     public static final String BUCKETFS_ROOT_PATH = "/buckets/bfsdefault/default/";
     public static final Path ADAPTER_JAR_LOCAL_PATH = Path.of("target", ADAPTER_JAR);
 
@@ -102,7 +102,7 @@ public class IntegrationTestSetup implements AutoCloseable {
     private String[] getAdapterJarsInBucketFs() {
         final JdbcDriverProvider uploader = new JdbcDriverProvider(getBucket());
         final List<String> jarFiles = uploader.uploadJdbcDriverToBucketFs(
-                "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.3.0.1001.zip");
+                "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.5.0.1001.zip");
         final List<String> jars = new ArrayList<>();
         jars.add(BUCKETFS_ROOT_PATH + ADAPTER_JAR);
         jars.addAll(jarFiles);

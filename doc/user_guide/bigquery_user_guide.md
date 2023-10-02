@@ -34,7 +34,7 @@ List all the JAR files from the JDBC driver.
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_BIGQUERY AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-10.5.0-bigquery-2.2.2.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-11.0.2-bigquery-2.2.3.jar;
     %jar /buckets/<BFS service>/<bucket>/GoogleBigQueryJDBC42.jar;
     ...
     ...
@@ -60,7 +60,7 @@ CREATE OR REPLACE CONNECTION BIGQUERY_JDBC_CONNECTION
 TO 'jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=<your project id>;OAuthType=0;OAuthServiceAcctEmail=<service account email>;OAuthPvtKeyPath=/<path to the bucket>/<name of the key file>';
 ```
 
-You can find additional information about the JDBC connection URL [in the Big Query JDBC installation guide](https://storage.googleapis.com/simba-bq-release/jdbc/Simba%20Google%20BigQuery%20JDBC%20Connector%20Install%20and%20Configuration%20Guide_1.3.0.1001.pdf).
+You can find additional information about the JDBC connection URL [in the Big Query JDBC installation guide](https://storage.googleapis.com/simba-bq-release/jdbc/Simba%20Google%20BigQuery%20JDBC%20Connector%20Install%20and%20Configuration%20Guide_1.5.0.1001.pdf).
 
 ## Creating a Virtual Schema
 
@@ -119,3 +119,4 @@ Virtual Schema Version | Big Query Version   | Driver Name                      
 -----------------------|---------------------|------------------------------------------|-----------------
  1.0.0                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.2.2.1004
  2.0.2                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.2.25.1029
+ 2.2.3                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.5.0.1001
