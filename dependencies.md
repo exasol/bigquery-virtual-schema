@@ -15,7 +15,7 @@
 | [Virtual Schema Common JDBC][0]                 | [MIT License][1]                 |
 | [Hamcrest][4]                                   | [BSD License 3][5]               |
 | [JUnit Jupiter (Aggregator)][6]                 | [Eclipse Public License v2.0][7] |
-| [mockito-junit-jupiter][8]                      | [The MIT License][9]             |
+| [mockito-junit-jupiter][8]                      | [MIT][9]                         |
 | [Testcontainers :: JUnit Jupiter Extension][10] | [MIT][11]                        |
 | [Testcontainers :: JDBC][10]                    | [MIT][11]                        |
 | [exasol-test-setup-abstraction-java][12]        | [MIT License][13]                |
@@ -23,33 +23,28 @@
 | [udf-debugging-java][16]                        | [MIT License][17]                |
 | [Matcher for SQL Result Sets][18]               | [MIT License][19]                |
 | [BigQuery][20]                                  | [Apache-2.0][21]                 |
-| [SLF4J JDK14 Binding][22]                       | [MIT License][23]                |
+| [SLF4J JDK14 Provider][22]                      | [MIT License][23]                |
 
 ## Plugin Dependencies
 
-| Dependency                                              | License                                        |
-| ------------------------------------------------------- | ---------------------------------------------- |
-| [SonarQube Scanner for Maven][24]                       | [GNU LGPL 3][25]                               |
-| [Apache Maven Compiler Plugin][26]                      | [Apache-2.0][21]                               |
-| [Apache Maven Enforcer Plugin][27]                      | [Apache-2.0][21]                               |
-| [Maven Flatten Plugin][28]                              | [Apache Software Licenese][21]                 |
-| [org.sonatype.ossindex.maven:ossindex-maven-plugin][29] | [ASL2][30]                                     |
-| [Maven Surefire Plugin][31]                             | [Apache-2.0][21]                               |
-| [Versions Maven Plugin][32]                             | [Apache License, Version 2.0][21]              |
-| [duplicate-finder-maven-plugin Maven Mojo][33]          | [Apache License 2.0][34]                       |
-| [Apache Maven Assembly Plugin][35]                      | [Apache-2.0][21]                               |
-| [Apache Maven JAR Plugin][36]                           | [Apache License, Version 2.0][21]              |
-| [Artifact reference checker and unifier][37]            | [MIT License][38]                              |
-| [Project keeper maven plugin][39]                       | [The MIT License][40]                          |
-| [Maven Failsafe Plugin][41]                             | [Apache-2.0][21]                               |
-| [JaCoCo :: Maven Plugin][42]                            | [Eclipse Public License 2.0][43]               |
-| [error-code-crawler-maven-plugin][44]                   | [MIT License][45]                              |
-| [Reproducible Build Maven Plugin][46]                   | [Apache 2.0][30]                               |
-| [Maven Clean Plugin][47]                                | [The Apache Software License, Version 2.0][30] |
-| [Maven Resources Plugin][48]                            | [The Apache Software License, Version 2.0][30] |
-| [Maven Install Plugin][49]                              | [The Apache Software License, Version 2.0][30] |
-| [Maven Deploy Plugin][50]                               | [The Apache Software License, Version 2.0][30] |
-| [Maven Site Plugin 3][51]                               | [The Apache Software License, Version 2.0][30] |
+| Dependency                                              | License                           |
+| ------------------------------------------------------- | --------------------------------- |
+| [SonarQube Scanner for Maven][24]                       | [GNU LGPL 3][25]                  |
+| [Apache Maven Compiler Plugin][26]                      | [Apache-2.0][21]                  |
+| [Apache Maven Enforcer Plugin][27]                      | [Apache-2.0][21]                  |
+| [Maven Flatten Plugin][28]                              | [Apache Software Licenese][21]    |
+| [org.sonatype.ossindex.maven:ossindex-maven-plugin][29] | [ASL2][30]                        |
+| [Maven Surefire Plugin][31]                             | [Apache-2.0][21]                  |
+| [Versions Maven Plugin][32]                             | [Apache License, Version 2.0][21] |
+| [duplicate-finder-maven-plugin Maven Mojo][33]          | [Apache License 2.0][34]          |
+| [Apache Maven Assembly Plugin][35]                      | [Apache-2.0][21]                  |
+| [Apache Maven JAR Plugin][36]                           | [Apache License, Version 2.0][21] |
+| [Artifact reference checker and unifier][37]            | [MIT License][38]                 |
+| [Project keeper maven plugin][39]                       | [The MIT License][40]             |
+| [Maven Failsafe Plugin][41]                             | [Apache-2.0][21]                  |
+| [JaCoCo :: Maven Plugin][42]                            | [Eclipse Public License 2.0][43]  |
+| [error-code-crawler-maven-plugin][44]                   | [MIT License][45]                 |
+| [Reproducible Build Maven Plugin][46]                   | [Apache 2.0][30]                  |
 
 [0]: https://github.com/exasol/virtual-schema-common-jdbc/
 [1]: https://github.com/exasol/virtual-schema-common-jdbc/blob/main/LICENSE
@@ -98,8 +93,3 @@
 [44]: https://github.com/exasol/error-code-crawler-maven-plugin/
 [45]: https://github.com/exasol/error-code-crawler-maven-plugin/blob/main/LICENSE
 [46]: http://zlika.github.io/reproducible-build-maven-plugin
-[47]: http://maven.apache.org/plugins/maven-clean-plugin/
-[48]: http://maven.apache.org/plugins/maven-resources-plugin/
-[49]: http://maven.apache.org/plugins/maven-install-plugin/
-[50]: http://maven.apache.org/plugins/maven-deploy-plugin/
-[51]: http://maven.apache.org/plugins/maven-site-plugin/
