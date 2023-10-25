@@ -84,9 +84,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- update transitive dependency to fix vulnerability CVE-2023-5072 -->
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
             <version>2.33.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
             <scope>test</scope>
         </dependency>
         <dependency>
