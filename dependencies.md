@@ -24,7 +24,7 @@
 | [Matcher for SQL Result Sets][18]               | [MIT License][19]                |
 | [BigQuery][20]                                  | [Apache-2.0][21]                 |
 | [JSON in Java][22]                              | [Public Domain][23]              |
-| [SLF4J JDK14 Provider][24]                      | [MIT License][25]                |
+| [SLF4J JDK14 Binding][24]                       | [MIT License][25]                |
 
 ## Plugin Dependencies
 

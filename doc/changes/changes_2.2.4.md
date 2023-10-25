@@ -17,7 +17,6 @@ This release fixes vulnerability CVE-2023-5072 in transitive test dependency to 
 * Updated `com.google.cloud:google-cloud-bigquery:2.33.1` to `2.33.2`
 * Added `org.json:json:20231013`
 * Updated `org.mockito:mockito-junit-jupiter:5.5.0` to `5.6.0`
-* Updated `org.slf4j:slf4j-jdk14:1.7.36` to `2.0.9`
 * Updated `org.testcontainers:jdbc:1.19.0` to `1.19.1`
 * Updated `org.testcontainers:junit-jupiter:1.19.0` to `1.19.1`
 
