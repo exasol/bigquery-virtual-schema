@@ -84,13 +84,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- update transitive dependency to fix vulnerability CVE-2023-5072 -->
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
             <version>2.33.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- update transitive dependency of com.google.cloud:google-cloud-bigquery to fix vulnerability CVE-2023-5072 -->
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20231013</version>
@@ -100,7 +100,7 @@
             <!-- Enable log output for integration tests. com.google.cloud:google-cloud-bigquery uses SLF4J 1.7.x -->
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>2.0.9</version>
+            <version>1.7.36</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
