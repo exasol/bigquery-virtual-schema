@@ -2,9 +2,9 @@
 
 Code name: Fixed vulnerabilities CVE-2024-25710 and CVE-2024-26308 in test dependencies
 
-This is a security release in which we updated test dependency `com.exasol:udf-debugging-java` to fix vulnerabilities CVE-2024-25710 and CVE-2024-26308 in its transitive dependencies.
-
 ## Summary
+
+This is a security release in which we updated test dependency `com.exasol:udf-debugging-java` to fix vulnerabilities CVE-2024-25710 and CVE-2024-26308 in its transitive dependencies.
 
 ## Security
 
