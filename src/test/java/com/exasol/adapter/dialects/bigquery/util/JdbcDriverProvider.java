@@ -43,10 +43,10 @@ class JdbcDriverProvider {
 
     private void uploadToBucketFs(final Path localFile, final String fileName) {
         try {
-            if (!bucket.listContents().contains(fileName)) {
+            if (!this.bucket.listContents().contains(fileName)) {
                 final String pathInBucket = "/" + fileName;
                 LOGGER.fine(() -> "Uploading " + localFile + " to bucket at " + pathInBucket);
-                bucket.uploadFile(localFile, pathInBucket);
+                this.bucket.uploadFile(localFile, pathInBucket);
             }
         } catch (FileNotFoundException | BucketAccessException | TimeoutException exception) {
             throw new IllegalStateException("Error uploading to bucketfs", exception);
@@ -54,11 +54,11 @@ class JdbcDriverProvider {
     }
 
     private String getUdfPath(final String folder, final String fileName) {
-        return "/buckets/" + bucket.getFullyQualifiedBucketName() + "/" + folder + "/" + fileName;
+        return "/buckets/" + this.bucket.getFullyQualifiedBucketName() + "/" + folder + "/" + fileName;
     }
 
     private List<String> listZipContent(final Path localFile) {
-        try (ZipFile zip = new ZipFile(localFile.toFile())) {
+        try (ZipFile zip = ZipFile.builder().setPath(localFile).get()) {
             return StreamSupport
                     .stream(Spliterators.spliteratorUnknownSize(zip.getEntries().asIterator(), Spliterator.ORDERED),
                             false)
