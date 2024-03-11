@@ -150,7 +150,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <compilerArgs>
-                        <arg>-Xlint:all</arg>
+                        <arg>-Xlint:all,-path,-processing,-try</arg>
                         <arg>-Werror</arg>
                     </compilerArgs>
                 </configuration>

@@ -27,22 +27,22 @@ public class BigQueryDatasetFixture implements AutoCloseable {
     }
 
     public DatasetId getDatasetId() {
-        return datasetId;
+        return this.datasetId;
     }
 
     @Override
     public void close() throws Exception {
-        final boolean success = client.delete(datasetId);
+        final boolean success = this.client.delete(this.datasetId);
         if (!success) {
-            throw new IllegalStateException("Failed to delete dataset " + datasetId);
+            throw new IllegalStateException("Failed to delete dataset " + this.datasetId);
         }
     }
 
     public void dropCreatedObjects() {
-        for (final BigQueryTable table : tables) {
+        for (final BigQueryTable table : this.tables) {
             table.close();
         }
-        tables.clear();
+        this.tables.clear();
     }
 
     public BigQueryTable createSingleColumnTable(final Field field) {
@@ -50,12 +50,12 @@ public class BigQueryDatasetFixture implements AutoCloseable {
     }
 
     public BigQueryTable createTable(final Schema schema) {
-        final TableId tableId = TableId.of(datasetId.getDataset(), "table" + System.currentTimeMillis());
+        final TableId tableId = TableId.of(this.datasetId.getDataset(), "table" + System.currentTimeMillis());
         final TableDefinition tableDefinition = StandardTableDefinition.of(schema);
         final TableInfo tableInfo = TableInfo.newBuilder(tableId, tableDefinition).build();
         LOGGER.fine("Creating BigQuery table " + tableId);
-        client.create(tableInfo);
-        final BigQueryTable table = new BigQueryTable(client, tableInfo);
+        this.client.create(tableInfo);
+        final BigQueryTable table = new BigQueryTable(this.client, tableInfo);
         this.tables.add(table);
         return table;
     }
@@ -71,16 +71,16 @@ public class BigQueryDatasetFixture implements AutoCloseable {
 
         @Override
         public void close() {
-            LOGGER.fine("Deleting BigQuery table " + tableInfo.getTableId());
-            final boolean success = client.delete(tableInfo.getTableId());
+            LOGGER.fine("Deleting BigQuery table " + this.tableInfo.getTableId());
+            final boolean success = this.client.delete(this.tableInfo.getTableId());
             if (!success) {
-                throw new IllegalStateException("Failed to delete table " + tableInfo.getTableId());
+                throw new IllegalStateException("Failed to delete table " + this.tableInfo.getTableId());
             }
         }
 
         public void insertRows(final List<Map<String, ?>> rows) {
-            final InsertAllResponse response = client
-                    .insertAll(InsertAllRequest.of(tableInfo, rows.stream().map(RowToInsert::of).collect(toList())));
+            final InsertAllResponse response = this.client.insertAll(
+                    InsertAllRequest.of(this.tableInfo, rows.stream().map(RowToInsert::of).collect(toList())));
             final List<String> insertErrors = response.getInsertErrors().values().stream().flatMap(List::stream)
                     .map(BigQueryError::toString).collect(toList());
             if (!insertErrors.isEmpty()) {
@@ -89,7 +89,7 @@ public class BigQueryDatasetFixture implements AutoCloseable {
         }
 
         public String getQualifiedName(final VirtualSchema virtualSchema) {
-            return "\"" + virtualSchema.getName() + "\".\"" + tableInfo.getTableId().getTable() + "\"";
+            return "\"" + virtualSchema.getName() + "\".\"" + this.tableInfo.getTableId().getTable() + "\"";
         }
     }
 }
