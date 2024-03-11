@@ -6,9 +6,9 @@ This is a security release in which we updated test dependency `com.exasol:exaso
 
 ## Summary
 
-## Features
+## Security
 
-* ISSUE_NUMBER: description
+* #60: Fixed vulnerability CVE-2024-25710
 
 ## Dependency Updates
 
