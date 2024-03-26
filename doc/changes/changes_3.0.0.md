@@ -1,6 +1,6 @@
 # Virtual Schema for BigQuery 3.0.0, released 2024-03-26
 
-Code name: Char set is always `utf-8`, deprecated IMPORT_DATA_TYPES `FROM_RESULT_SET` value .
+Code name: Charset is always `utf-8`, deprecated IMPORT_DATA_TYPES `FROM_RESULT_SET` value
 
 ## Summary
 
@@ -11,7 +11,7 @@ An exception will be thrown when users use`FROM_RESULT_SET`. The exception messa
 
 ## Refactoring
 
-* #22: Update tests to include Exasol V8/ Update to vsjdbc 12.0.0
+* #22: Updated tests to include Exasol V8, update to vsjdbc 12.0.0
 
 ## Dependency Updates
 
