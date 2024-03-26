@@ -1,5 +1,7 @@
 # Virtual Schema for BigQuery 3.0.0, released 2024-??-??
 
+Code name:
+
 ## Summary
 
 The behaviour when it comes to character sets is now simplified,
@@ -15,4 +17,5 @@ An exception will be thrown when users use`FROM_RESULT_SET`. The exception messa
 
 ### Plugin Dependency Updates
 
+* Updated `com.exasol:error-code-crawler-maven-plugin:2.0.0` to `2.0.1`
 * Updated `com.exasol:project-keeper-maven-plugin:4.1.0` to `4.2.0`
