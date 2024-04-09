@@ -19,7 +19,6 @@ This release fixed vulnerability CVE-2024-29025 in dependencies.
 * Updated `com.exasol:exasol-test-setup-abstraction-java:2.1.0` to `2.1.2`
 * Updated `com.exasol:test-db-builder-java:3.5.3` to `3.5.4`
 * Updated `com.exasol:udf-debugging-java:0.6.12` to `0.6.13`
-* Updated `com.google.cloud:google-cloud-bigquery:2.38.1` to `2.38.2`
 
 ### Plugin Dependency Updates
 
