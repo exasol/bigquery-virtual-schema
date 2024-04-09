@@ -10,6 +10,7 @@ This release fixed vulnerability CVE-2024-29025 in dependencies.
 
 * #33: Fixed CVE-2024-29025 in `io.netty:netty-codec-http:jar:4.1.107.Final:test`
 
+**Excluded Vulnerability** We accept vulnerability CVE-2017-10355 (CWE-833: Deadlock) in test dependency `xerces:xercesImpl:jar:2.12.2` as we assume that we only connect to the known endpoint ExaOperations.
 
 ## Dependency Updates
 
