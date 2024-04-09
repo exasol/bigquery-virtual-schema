@@ -12,7 +12,7 @@ This release fixed vulnerability CVE-2024-29025 in dependencies.
 
 **Excluded Vulnerability** We accept vulnerability CVE-2017-10355 (CWE-833: Deadlock) in test dependency `xerces:xercesImpl:jar:2.12.2` as we assume that we only connect to the known endpoint ExaOperations.
 
- **Excluded Vulnerability** We temporarily accept vulnerability CVE-2024-2308 in test dependency `org.threeten:threetenbp:jar:1.6.8:test`.
+ **Excluded Vulnerability** We temporarily accept vulnerability CVE-2024-23081 in test dependency `org.threeten:threetenbp:jar:1.6.8:test`.
 
 ## Dependency Updates
 
