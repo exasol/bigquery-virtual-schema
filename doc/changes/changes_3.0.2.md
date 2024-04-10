@@ -1,10 +1,11 @@
-# Virtual Schema for BigQuery 3.0.2, released 2024-??-??
+# Virtual Schema for BigQuery 3.0.2, released 2024-04-10
 
-Code name: Fixed vulnerabilities CVE-2024-23081, CVE-2024-23082
+Code name: Excluded vulnerabilities CVE-2024-23081, CVE-2024-23082
 
 ## Summary
 
-This release fixes the following 2 vulnerabilities:
+We assume that google-cloud-storage uses the library correctly.
+This release excludes the following 2 vulnerabilities:
 
 ### CVE-2024-23081 (CWE-476) in dependency `org.threeten:threetenbp:jar:1.6.8:test`
 ThreeTen Backport v1.6.8 was discovered to contain a NullPointerException via the component org.threeten.bp.LocalDate::compareTo(ChronoLocalDate).
@@ -22,6 +23,6 @@ ThreeTen Backport v1.6.8 was discovered to contain an integer overflow via the c
 
 ## Security
 
-* #35: Fixed vulnerability CVE-2024-23081 in dependency `org.threeten:threetenbp:jar:1.6.8:test`
-* #36: Fixed vulnerability CVE-2024-23082 in dependency `org.threeten:threetenbp:jar:1.6.8:test`
+* #35: Excluded vulnerability CVE-2024-23081 in dependency `org.threeten:threetenbp:jar:1.6.8:test`
+* #36: Excluded vulnerability CVE-2024-23082 in dependency `org.threeten:threetenbp:jar:1.6.8:test`
 
