@@ -3,7 +3,6 @@ package com.exasol.adapter.dialects.bigquery.util;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
@@ -66,7 +65,7 @@ public class IntegrationTestSetup implements AutoCloseable {
             final ExasolTestSetup exasolTestSetup = new ExasolTestSetupFactory(
                     Path.of("cloudSetup/generated/testConfig.json")).getTestSetup();
             return new IntegrationTestSetup(bigQueryTestSetup, exasolTestSetup);
-        } catch (SQLException | BucketAccessException | TimeoutException | IOException | URISyntaxException exception) {
+        } catch (SQLException | BucketAccessException | TimeoutException | IOException exception) {
             throw new IllegalStateException("Failed to create test setup: " + exception.getMessage(), exception);
         }
     }
