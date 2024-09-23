@@ -3,7 +3,6 @@ package com.exasol.adapter.dialects.bigquery.util;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
@@ -23,7 +22,7 @@ import com.google.cloud.bigquery.BigQuery;
 
 public class IntegrationTestSetup implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(IntegrationTestSetup.class.getName());
-    private static final String ADAPTER_JAR = "virtual-schema-dist-12.0.0-bigquery-3.0.2.jar";
+    private static final String ADAPTER_JAR = "virtual-schema-dist-12.0.0-bigquery-3.0.3.jar";
     public static final String BUCKETFS_ROOT_PATH = "/buckets/bfsdefault/default/";
     public static final Path ADAPTER_JAR_LOCAL_PATH = Path.of("target", ADAPTER_JAR);
 
@@ -39,7 +38,7 @@ public class IntegrationTestSetup implements AutoCloseable {
     private final BigQueryDatasetFixture bigQueryDataset;
 
     private IntegrationTestSetup(final BigQueryTestSetup bigQueryTestSetup, final ExasolTestSetup exasolTestSetup)
-            throws SQLException, BucketAccessException, TimeoutException, IOException, URISyntaxException {
+            throws SQLException, BucketAccessException, TimeoutException, IOException {
         this.bigQueryTestSetup = bigQueryTestSetup;
         this.bigQueryDataset = BigQueryDatasetFixture.create(bigQueryTestSetup.getClient(),
                 bigQueryTestSetup.getProjectId());
@@ -65,9 +64,8 @@ public class IntegrationTestSetup implements AutoCloseable {
         try {
             final ExasolTestSetup exasolTestSetup = new ExasolTestSetupFactory(
                     Path.of("cloudSetup/generated/testConfig.json")).getTestSetup();
-            final IntegrationTestSetup setup = new IntegrationTestSetup(bigQueryTestSetup, exasolTestSetup);
-            return setup;
-        } catch (SQLException | BucketAccessException | TimeoutException | IOException | URISyntaxException exception) {
+            return new IntegrationTestSetup(bigQueryTestSetup, exasolTestSetup);
+        } catch (SQLException | BucketAccessException | TimeoutException | IOException exception) {
             throw new IllegalStateException("Failed to create test setup: " + exception.getMessage(), exception);
         }
     }

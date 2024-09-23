@@ -5,11 +5,9 @@ sources:
       - integration_tests
       - jar_artifact
 linkReplacements:
-excludes:
-- "E-PK-CORE-17: Missing required file: 'release_config.yml'"
 build:
   runnerOs: ubuntu-20.04
   freeDiskSpace: false
   exasolDbVersions:
-    - "7.1.25"
-    - "8.24.0"
+    - "8.31.0"
+    - "7.1.29"
