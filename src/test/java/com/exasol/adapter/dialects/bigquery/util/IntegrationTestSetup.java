@@ -39,7 +39,7 @@ public class IntegrationTestSetup implements AutoCloseable {
     private final BigQueryDatasetFixture bigQueryDataset;
 
     private IntegrationTestSetup(final BigQueryTestSetup bigQueryTestSetup, final ExasolTestSetup exasolTestSetup)
-            throws SQLException, BucketAccessException, TimeoutException, IOException, URISyntaxException {
+            throws SQLException, BucketAccessException, TimeoutException, IOException {
         this.bigQueryTestSetup = bigQueryTestSetup;
         this.bigQueryDataset = BigQueryDatasetFixture.create(bigQueryTestSetup.getClient(),
                 bigQueryTestSetup.getProjectId());
