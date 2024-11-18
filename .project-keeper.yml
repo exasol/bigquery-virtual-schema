@@ -10,4 +10,4 @@ build:
   freeDiskSpace: false
   exasolDbVersions:
     - "8.32.0"
-    - "7.1.29"
+    - "7.1.30"
