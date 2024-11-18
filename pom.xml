@@ -65,24 +65,6 @@
             <version>2.1.5</version>
             <scope>test</scope>
         </dependency>
-        <!-- Fix NullPointerException with Exasol DockerDB >= 8.29.1.
-             Remove once https://github.com/exasol/exasol-test-setup-abstraction-java/issues/84 is fixed.
-        <dependency>
-            <groupId>com.exasol</groupId>
-            <artifactId>exasol-testcontainers</artifactId>
-            <version>7.1.1</version>
-            <scope>test</scope>
-        </dependency>
--->
-        <!-- Fix java.lang.NoSuchMethodError: 'com.exasol.bucketfs.ReadEnabledBucket$Builder com.exasol.bucketfs.WriteEnabledBucket$Builder.allowAlternativeHostName(java.lang.String)'
-        <dependency>
-                 Remove once exasol-test-setup-abstraction-java is updated.
-            <groupId>com.exasol</groupId>
-            <artifactId>bucketfs-java</artifactId>
-            <version>3.2.0</version>
-            <scope>test</scope>
-        </dependency>
--->
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
