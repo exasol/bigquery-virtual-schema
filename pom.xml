@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>bigquery-virtual-schema</artifactId>
-    <version>3.0.3</version>
+    <version>3.0.4</version>
     <name>Virtual Schema for BigQuery</name>
     <description>Virtual Schema for connecting Big Query as a data source to Exasol</description>
     <properties>
@@ -37,54 +37,38 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.11.0</version>
+            <version>5.11.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.13.0</version>
+            <version>5.14.2</version>
             <scope>test</scope>
         </dependency>
         <!-- Integration test dependencies -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.20.1</version>
+            <version>1.20.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
-            <version>1.20.1</version>
+            <version>1.20.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-test-setup-abstraction-java</artifactId>
-            <version>2.1.4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Fix NullPointerException with Exasol DockerDB >= 8.29.1.
-                 Remove once https://github.com/exasol/exasol-test-setup-abstraction-java/issues/84 is fixed. -->
-            <groupId>com.exasol</groupId>
-            <artifactId>exasol-testcontainers</artifactId>
-            <version>7.1.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Fix java.lang.NoSuchMethodError: 'com.exasol.bucketfs.ReadEnabledBucket$Builder com.exasol.bucketfs.WriteEnabledBucket$Builder.allowAlternativeHostName(java.lang.String)'
-                 Remove once exasol-test-setup-abstraction-java is updated. -->
-            <groupId>com.exasol</groupId>
-            <artifactId>bucketfs-java</artifactId>
-            <version>3.2.0</version>
+            <version>2.1.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>3.5.4</version>
+            <version>3.6.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -102,25 +86,18 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
-            <version>2.42.3</version>
+            <version>2.43.3</version>
             <scope>test</scope>
         </dependency>
+        <!-- update transitive dependency of com.google.cloud:google-cloud-bigquery to fix vulnerability CVE-2024-47535 -->
         <dependency>
-            <!-- update transitive dependency of com.google.cloud:google-cloud-bigquery to fix vulnerability CVE-2023-5072 -->
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20240303</version>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
+            <version>4.1.115.Final</version>
             <scope>test</scope>
         </dependency>
+        <!-- Enable log output for integration tests. com.google.cloud:google-cloud-bigquery uses SLF4J 1.7.x -->
         <dependency>
-            <!-- Upgrade transitive dependency of com.google.cloud:google-cloud-bigquery to fix CVE-2024-7254 -->
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>3.25.5</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Enable log output for integration tests. com.google.cloud:google-cloud-bigquery uses SLF4J 1.7.x -->
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
             <version>2.0.16</version>
@@ -148,7 +125,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>4.3.3</version>
+                <version>4.4.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -208,7 +185,7 @@
     <parent>
         <artifactId>bigquery-virtual-schema-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>3.0.3</version>
+        <version>3.0.4</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
