@@ -36,7 +36,7 @@ Netty is an asynchronous event-driven network application framework for rapid de
 
 ### Plugin Dependency Updates
 
- * Updated `com.exasol:project-keeper-maven-plugin:4.3.3` to `4.4.0`
+* Updated `com.exasol:project-keeper-maven-plugin:4.3.3` to `4.4.0`
 * Added `com.exasol:quality-summarizer-maven-plugin:0.2.0`
 * Updated `io.github.zlika:reproducible-build-maven-plugin:0.16` to `0.17`
 * Updated `org.apache.maven.plugins:maven-clean-plugin:2.5` to `3.4.0`
