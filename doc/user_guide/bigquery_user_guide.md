@@ -120,3 +120,4 @@ Virtual Schema Version | Big Query Version   | Driver Name                      
  1.0.0                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.2.2.1004
  2.0.2                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.2.25.1029
  2.2.3                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.5.0.1001
+ 3.0.5                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.6.2.1003
