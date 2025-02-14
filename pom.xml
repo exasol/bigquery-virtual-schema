@@ -83,6 +83,13 @@
             <artifactId>exasol-test-setup-abstraction-java</artifactId>
             <version>2.1.7</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <!-- Fix CVE-2017-10355. We don't xerces need to connect to ExaOperations. -->
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -165,8 +172,7 @@
                 <artifactId>ossindex-maven-plugin</artifactId>
                 <configuration>
                     <excludeVulnerabilityIds>
-                        <!-- Transitive test dependency xerces:xercesImpl:jar:2.12.2. We assume that we only connect to the known endpoint ExaOperations.-->
-                        <exclude>CVE-2017-10355</exclude>
+                        
                         <!-- Transitive dependency org.threeten:threetenbp:jar:1.6.8:test. We assume that google-cloud-storage uses the library correctly.-->
                         <exclude>CVE-2024-23081</exclude>
                         <!-- Transitive dependency org.threeten:threetenbp:jar:1.6.8:test. We assume that google-cloud-storage uses the library correctly.-->
