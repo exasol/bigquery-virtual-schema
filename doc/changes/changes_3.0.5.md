@@ -1,4 +1,4 @@
-# Virtual Schema for BigQuery 3.0.5, released 2024-02-13
+# Virtual Schema for BigQuery 3.0.5, released 2024-02-??
 
 Code name: Fix CVE-2025-25193 and CVE-2025-24970 in test dependencies
 
