@@ -23,7 +23,12 @@
 | [udf-debugging-java][16]                        | [MIT License][17]                |
 | [Matcher for SQL Result Sets][18]               | [MIT License][19]                |
 | [BigQuery][20]                                  | [Apache-2.0][21]                 |
-| [SLF4J JDK14 Provider][22]                      | [MIT License][23]                |
+
+## Runtime Dependencies
+
+| Dependency                | License           |
+| ------------------------- | ----------------- |
+| [SLF4J JDK14 Binding][22] | [MIT License][23] |
 
 ## Plugin Dependencies
 

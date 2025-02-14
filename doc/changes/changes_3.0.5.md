@@ -13,6 +13,10 @@ This release fixes CVE-2025-25193 and CVE-2025-24970 in test dependencies.
 
 ## Dependency Updates
 
+### Runtime Dependency Updates
+
+* Added `org.slf4j:slf4j-jdk14:1.7.36`
+
 ### Test Dependency Updates
 
 * Updated `com.exasol:exasol-test-setup-abstraction-java:2.1.5` to `2.1.7`
@@ -21,6 +25,7 @@ This release fixes CVE-2025-25193 and CVE-2025-24970 in test dependencies.
 * Removed `io.netty:netty-common:4.1.115.Final`
 * Updated `org.junit.jupiter:junit-jupiter:5.11.3` to `5.11.4`
 * Updated `org.mockito:mockito-junit-jupiter:5.14.2` to `5.15.2`
+* Removed `org.slf4j:slf4j-jdk14:2.0.16`
 * Updated `org.testcontainers:jdbc:1.20.3` to `1.20.4`
 * Updated `org.testcontainers:junit-jupiter:1.20.3` to `1.20.4`
 
