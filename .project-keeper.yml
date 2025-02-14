@@ -6,6 +6,7 @@ sources:
       - jar_artifact
 linkReplacements:
 build:
+  # UDFs in Exasol 7.1 require Ubuntu 20.04
   runnerOs: ubuntu-20.04
   freeDiskSpace: false
   exasolDbVersions:

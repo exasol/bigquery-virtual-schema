@@ -56,7 +56,6 @@ public class BigQuerySqlDialect extends AbstractSqlDialect {
                     "Unable to create BigQuery remote metadata reader. Caused by: " + exception.getMessage(),
                     exception);
         }
-
     }
 
     @Override

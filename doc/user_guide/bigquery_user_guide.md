@@ -34,7 +34,7 @@ List all the JAR files from the JDBC driver.
 ```sql
 CREATE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_BIGQUERY AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-12.0.0-bigquery-3.0.4.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-12.0.0-bigquery-3.0.5.jar;
     %jar /buckets/<BFS service>/<bucket>/GoogleBigQueryJDBC42.jar;
     ...
     ...
@@ -120,3 +120,4 @@ Virtual Schema Version | Big Query Version   | Driver Name                      
  1.0.0                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.2.2.1004
  2.0.2                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.2.25.1029
  2.2.3                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.5.0.1001
+ 3.0.5                 | Google BigQuery 2.0 | Magnitude Simba JDBC driver for BigQuery | 1.6.2.1003

@@ -3,12 +3,24 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>bigquery-virtual-schema</artifactId>
-    <version>3.0.4</version>
+    <version>3.0.5</version>
     <name>Virtual Schema for BigQuery</name>
     <description>Virtual Schema for connecting Big Query as a data source to Exasol</description>
     <properties>
         <vscjdbc.version>12.0.0</vscjdbc.version>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Update transitive dependency of com.google.cloud:google-cloud-bigquery to fix CVE-2024-47535, CVE-2025-25193 & CVE-2025-24970 -->
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>4.1.118.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -19,6 +31,13 @@
             <groupId>com.exasol</groupId>
             <artifactId>error-reporting-java</artifactId>
             <version>1.0.1</version>
+        </dependency>
+        <!-- Enable log output for UDFs and integration tests. com.google.cloud:google-cloud-bigquery uses SLF4J 1.7.x -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.36</version>
+            <scope>runtime</scope>
         </dependency>
         <!-- Unit test dependencies -->
         <dependency>
@@ -37,33 +56,40 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.11.3</version>
+            <version>5.11.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.14.2</version>
+            <version>5.15.2</version>
             <scope>test</scope>
         </dependency>
         <!-- Integration test dependencies -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.20.3</version>
+            <version>1.20.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
-            <version>1.20.3</version>
+            <version>1.20.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-test-setup-abstraction-java</artifactId>
-            <version>2.1.5</version>
+            <version>2.1.7</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <!-- Fix CVE-2017-10355. We don't xerces need to connect to ExaOperations. -->
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -74,7 +100,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>udf-debugging-java</artifactId>
-            <version>0.6.13</version>
+            <version>0.6.15</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -86,21 +112,7 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
-            <version>2.43.3</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- update transitive dependency of com.google.cloud:google-cloud-bigquery to fix vulnerability CVE-2024-47535 -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-common</artifactId>
-            <version>4.1.115.Final</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Enable log output for integration tests. com.google.cloud:google-cloud-bigquery uses SLF4J 1.7.x -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>2.0.16</version>
+            <version>2.48.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -125,7 +137,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>4.4.0</version>
+                <version>4.5.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -160,8 +172,7 @@
                 <artifactId>ossindex-maven-plugin</artifactId>
                 <configuration>
                     <excludeVulnerabilityIds>
-                        <!-- Transitive test dependency xerces:xercesImpl:jar:2.12.2. We assume that we only connect to the known endpoint ExaOperations.-->
-                        <exclude>CVE-2017-10355</exclude>
+                        
                         <!-- Transitive dependency org.threeten:threetenbp:jar:1.6.8:test. We assume that google-cloud-storage uses the library correctly.-->
                         <exclude>CVE-2024-23081</exclude>
                         <!-- Transitive dependency org.threeten:threetenbp:jar:1.6.8:test. We assume that google-cloud-storage uses the library correctly.-->
@@ -174,8 +185,8 @@
                 <artifactId>versions-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <!-- google-cloud-bigquery requires an outdated version -->
-                        <exclude>com.google.protobuf:protobuf-java:jar:*:*</exclude>
+                        <!-- google-cloud-bigquery uses SLF4J 1.7, we can't upgrade to 2.0 -->
+                        <exclude>org.slf4j:slf4j-jdk14:jar:*:*</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -185,7 +196,7 @@
     <parent>
         <artifactId>bigquery-virtual-schema-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>3.0.4</version>
+        <version>3.0.5</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
