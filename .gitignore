@@ -39,5 +39,6 @@ venv/
 *.md.html
 *.flattened-pom.xml
 
-test.properties
+/test.properties
+/google-service-account-key.json
 /.apt_generated_tests/

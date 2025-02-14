@@ -13,10 +13,14 @@ import com.exasol.bucketfs.Bucket;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 
+/**
+ * We don't use Testcontainers <a href="https://java.testcontainers.org/modules/gcloud/">gcloud</a> module as it does
+ * not support all required options.
+ */
 class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContainer> implements BigQueryTestSetup {
     private static final Logger LOGGER = Logger.getLogger(BigQueryEmulatorContainer.class.getName());
     private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName
-            .parse("ghcr.io/goccy/bigquery-emulator:0.4.3");
+            .parse("ghcr.io/goccy/bigquery-emulator:0.6.6");
     private static final int PORT = 9050;
     private static final String PROJECT_ID = "test";
     private Path dataYaml;
