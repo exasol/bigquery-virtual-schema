@@ -146,7 +146,6 @@ public class IntegrationTestSetup implements AutoCloseable {
     private Map<String, String> getVirtualSchemaProperties() {
         final Map<String, String> properties = new HashMap<>();
         properties.put("CATALOG_NAME", this.bigQueryDataset.getDatasetId().getProject());
-        properties.put("LOG_LEVEL", "ALL");
         final String debugProperty = System.getProperty("test.debug", "");
         final String profileProperty = System.getProperty("test.jprofiler", "");
         if (!debugProperty.isBlank() || !profileProperty.isBlank()) {
