@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.errorreporting.ExaError;
 
 /**
  * Builds a {@code SELECT * FROM VALUES} query from the rows of a {@link ResultSet}.
@@ -31,10 +32,16 @@ class ValueQueryBuilder {
 
     ValueQueryBuilder(final SqlDialect dialect, final List<DataType> selectListDataTypes, final ResultSet resultSet)
             throws SQLException {
-        this.dialect = dialect;
-        this.selectListDataTypes = selectListDataTypes;
         this.resultSet = resultSet;
         this.metaData = resultSet.getMetaData();
+        final int columnCount = metaData.getColumnCount();
+        if (selectListDataTypes.size() != columnCount) {
+            throw new IllegalStateException(ExaError.messageBuilder("E-VSBIGQ-1").message(
+                    "Column count in result set ({{result set column count}}) is different from data types in select list ({{select list column count}}).",
+                    columnCount, selectListDataTypes.size()).ticketMitigation().toString());
+        }
+        this.dialect = dialect;
+        this.selectListDataTypes = selectListDataTypes;
         builder.append("SELECT * FROM VALUES");
     }
 
@@ -154,7 +161,7 @@ class ValueQueryBuilder {
     }
 
     private String castType(final String literal, final DataType type) {
-        return String.format("CAST(%s as %s)", literal, type.toString());
+        return String.format("CAST (%s AS %s)", literal, type.toString());
     }
 
     private void appendString(final String columnName, final DataType dataType) throws SQLException {
