@@ -66,7 +66,7 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     }
 
     @Test
-    void testInconsistentColumnCount() throws AdapterException, SQLException {
+    void testInconsistentColumnCount() throws SQLException {
         when(this.mockResultSetMetaData.getColumnCount()).thenReturn(3);
         final IllegalStateException exception = assertThrows(IllegalStateException.class, this::rewrite);
         assertThat(exception.getMessage(), equalTo(

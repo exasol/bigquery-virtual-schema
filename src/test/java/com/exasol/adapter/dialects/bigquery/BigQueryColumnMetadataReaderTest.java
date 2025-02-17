@@ -20,7 +20,7 @@ import com.exasol.adapter.metadata.DataType.ExaCharset;
 
 class BigQueryColumnMetadataReaderTest {
     private BigQueryColumnMetadataReader columnMetadataReader;
-    private final static int VALUE_IGNORED = Integer.MAX_VALUE;
+    private static final int VALUE_IGNORED = Integer.MAX_VALUE;
 
     @BeforeEach
     void beforeEach() {
