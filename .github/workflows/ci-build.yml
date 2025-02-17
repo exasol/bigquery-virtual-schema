@@ -70,7 +70,8 @@ jobs:
       - name: Create test.properties
         id: create-test-config
         run: |
-          echo "${{ secrets.GCS_SERVICE_ACCOUNT_KEY_JSON }}" > google-service-account-key.json
+          echo "$GCS_SERVICE_ACCOUNT_KEY_JSON_BASE64" > gcp_credentials_enc.json
+          cat gcp_credentials_enc.json | base64 --decode > google-service-account-key.json
           echo "serviceAccountEmail = ${{ secrets.GCS_SERVICE_ACCOUNT_EMAIL }}" > test.properties
           echo "googleProjectId = ${{ secrets.GCS_PROJECT_ID }}" >> test.properties
           echo "privateKeyPath = google-service-account-key.json" >> test.properties
