@@ -122,48 +122,52 @@ class ValueQueryBuilder {
     private void appendGeometry(final String columnName, final DataType dataType) throws SQLException {
         final String value = resultSet.getString(columnName);
         final String literal = resultSet.wasNull() ? "NULL" : "'" + value + "'";
-        builder.append(castType(literal, dataType));
+        appendCastType(literal, dataType);
     }
 
     private void appendBigInt(final String columnName, final DataType dataType) throws SQLException {
         final String string = resultSet.getString(columnName);
         final String literal = resultSet.wasNull() ? "NULL" : new BigInteger(string).toString(10);
-        builder.append(castType(literal, dataType));
+        appendCastType(literal, dataType);
     }
 
     private void appendDouble(final String columnName, final DataType dataType) throws SQLException {
         final double value = resultSet.getDouble(columnName);
         final String literal = resultSet.wasNull() ? "NULL" : String.valueOf(value);
-        builder.append(castType(literal, dataType));
+        appendCastType(literal, dataType);
     }
 
     private void appendBoolean(final String columnName, final DataType dataType) throws SQLException {
         final boolean value = resultSet.getBoolean(columnName);
         final String literal = resultSet.wasNull() ? "NULL" : String.valueOf(value);
-        builder.append(castType(literal, dataType));
+        appendCastType(literal, dataType);
     }
 
     private void appendDate(final String columnName, final DataType dataType) throws SQLException {
         final Date date = resultSet.getDate(columnName, this.utcCalendar);
         final String literal = date == null ? "NULL" : String.format("'%s'", DATE_FORMATTER.format(date.toLocalDate()));
-        builder.append(castType(literal, dataType));
+        appendCastType(literal, dataType);
     }
 
     private void appendTimestamp(final String columnName, final DataType dataType) throws SQLException {
         final Timestamp timestamp = resultSet.getTimestamp(columnName, this.utcCalendar);
         final String literal = timestamp == null ? "NULL"
                 : String.format("'%s'", TIMESTAMP_FORMATTER.format(timestamp.toInstant()));
-        builder.append(castType(literal, dataType));
-    }
-
-    private String castType(final String literal, final DataType type) {
-        return String.format("CAST (%s AS %s)", literal, type.toString());
+        appendCastType(literal, dataType);
     }
 
     private void appendString(final String columnName, final DataType dataType) throws SQLException {
         final String value = resultSet.getString(columnName);
         final String literal = value == null ? "NULL" : this.dialect.getStringLiteral(value);
+        appendCastType(literal, dataType);
+    }
+
+    private void appendCastType(final String literal, final DataType dataType) {
         builder.append(castType(literal, dataType));
+    }
+
+    private static String castType(final String literal, final DataType dataType) {
+        return String.format("CAST (%s AS %s)", literal, dataType.toString());
     }
 
     /**
