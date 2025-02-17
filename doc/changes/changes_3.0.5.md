@@ -1,15 +1,23 @@
-# Virtual Schema for BigQuery 3.0.5, released 2024-02-??
+# Virtual Schema for BigQuery 3.0.5, released 2024-02-17
 
-Code name: Fix CVE-2025-25193 and CVE-2025-24970 in test dependencies
+Code name: Adapt to new Exasol version and fix CVE-2025-25193 and CVE-2025-24970 in test dependencies
 
 ## Summary
 
-This release fixes CVE-2025-25193 and CVE-2025-24970 in test dependencies.
+This release fixes CVE-2025-25193 and CVE-2025-24970 in test dependencies. It also fixes an issue with stricter type checks for pushdown queries introduced in recent Exasol versions that caused queries to fail with the following error:
+
+```
+Adapter generated invalid pushdown query for virtual table table1739544294440: Data type mismatch in column number 1 (1-indexed). Expected DECIMAL(19,0), but got DECIMAL(1,0). (pushdown query: SELECT * FROM VALUES(1, 1) WHERE false) 
+```
 
 ## Security
 
 * #45: Fixed CVE-2025-25193 in `io.netty:netty-common:jar:4.1.115.Final:test`
 * #44: Fixed CVE-2025-24970 in `io.netty:netty-handler:jar:4.1.112.Final:test`
+
+## Bugfixes
+
+* #47: Adapted pushdown queries to stricter type checks
 
 ## Dependency Updates
 
