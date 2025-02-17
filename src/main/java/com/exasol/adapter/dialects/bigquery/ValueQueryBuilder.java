@@ -71,13 +71,9 @@ class ValueQueryBuilder {
         final JDBCType type = JDBCType.valueOf(metaData.getColumnType(columnNumber));
         final String typeName = metaData.getColumnTypeName(columnNumber);
         final DataType expectedExasolType = selectListDataTypes.get(columnNumber - 1);
-        LOGGER.info(() -> "Mapping row " + rowNumber + " / column '" + columnName + "' (" + columnNumber + ") of type "
-                + type + " (" + type.getVendorTypeNumber() + ") / type name '" + typeName + "', expected type "
-                + expectedExasolType);
-
-        System.out.println("Mapping row " + rowNumber + " / column '" + columnName + "' (" + columnNumber + ") of type "
-                + type + " (" + type.getVendorTypeNumber() + ") / type name '" + typeName + "', expected type "
-                + expectedExasolType);
+        LOGGER.fine(() -> String.format(
+                "Mapping row %d / column '%s' (%d) of type %s (%d) / type name '%s', expected type %s", rowNumber,
+                columnName, columnNumber, type, type.getVendorTypeNumber(), typeName, expectedExasolType));
 
         if ("GEOGRAPHY".equals(typeName)) {
             appendGeometry(columnName, expectedExasolType);
@@ -112,8 +108,8 @@ class ValueQueryBuilder {
             break;
         case VARBINARY:
         default:
-            LOGGER.info(
-                    () -> "Mapping unknown column " + columnName + " of type " + type + "/" + typeName + " to string");
+            LOGGER.info(() -> String.format("Mapping unknown column '%s' of type %s / %s to string", columnName, type,
+                    typeName));
             appendString(columnName, expectedExasolType);
             break;
         }
