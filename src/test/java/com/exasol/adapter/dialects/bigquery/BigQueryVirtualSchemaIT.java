@@ -4,6 +4,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -51,7 +53,7 @@ class BigQueryVirtualSchemaIT {
         final VirtualSchema virtualSchema = setup.createVirtualSchema("virtualSchema");
         final ResultSet result = setup.getStatement()
                 .executeQuery("SELECT * FROM " + table.getQualifiedName(virtualSchema));
-        assertThat(result, ResultSetStructureMatcher.table("SMALLINT", "SMALLINT").matches());
+        assertThat(result, ResultSetStructureMatcher.table("DECIMAL", "VARCHAR").matches());
     }
 
     List<DataTypeTestCase> createDataTypes() {
@@ -84,14 +86,21 @@ class BigQueryVirtualSchemaIT {
         final List<DataTypeTestCase> tests = createDataTypes();
         final BigQueryTable table = prepareTable(tests);
         final VirtualSchema virtualSchema = setup.createVirtualSchema("virtualSchema");
-        return tests.stream().map(test -> DynamicTest.dynamicTest(test.getTestName(), () -> {
-            final ResultSet result = setup.getStatement().executeQuery("SELECT \"" + test.getColumnName() + "\" FROM "
-                    + table.getQualifiedName(virtualSchema) + " ORDER BY \"id\" ASC");
-            assertThat(result,
-                    ResultSetStructureMatcher.table(test.expectedExasolType)
-                            .withCalendar(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
-                            .row(test.expectedExasolValue).row((Object) null).matches());
-        }));
+        return tests.stream().map(test -> dynamicContainer(test.getTestName(),
+                Stream.of(dynamicTest("Result value " + test.expectedExasolValue, () -> {
+                    try (final ResultSet result = setup.getStatement().executeQuery("SELECT \"" + test.getColumnName()
+                            + "\" FROM " + table.getQualifiedName(virtualSchema) + " ORDER BY \"id\" ASC")) {
+                        assertThat(result,
+                                ResultSetStructureMatcher.table(test.expectedExasolType)
+                                        .withCalendar(Calendar.getInstance(TimeZone.getTimeZone("UTC")))
+                                        .row(test.expectedExasolValue).row((Object) null).matches());
+                    }
+                }), dynamicTest("Empty result of type " + test.expectedExasolType, () -> {
+                    try (final ResultSet result = setup.getStatement().executeQuery("SELECT \"" + test.getColumnName()
+                            + "\" FROM " + table.getQualifiedName(virtualSchema) + " WHERE 1=2")) {
+                        assertThat(result, ResultSetStructureMatcher.table(test.expectedExasolType).matches());
+                    }
+                }))));
     }
 
     private BigQueryTable prepareTable(final List<DataTypeTestCase> tests) {

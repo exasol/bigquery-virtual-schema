@@ -9,14 +9,13 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import com.exasol.adapter.dialects.SqlDialect;
+import com.exasol.adapter.metadata.DataType;
 
 /**
  * Builds a {@code SELECT * FROM VALUES} query from the rows of a {@link ResultSet}.
  */
 class ValueQueryBuilder {
     private static final Logger LOGGER = Logger.getLogger(ValueQueryBuilder.class.getName());
-    private static final String CAST = "CAST";
-    private static final String CAST_NULL_AS_VARCHAR_4 = CAST + " (NULL AS VARCHAR(4))";
     private static final ZoneId UTC_TIMEZONE_ID = ZoneId.of("UTC");
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
             .withZone(UTC_TIMEZONE_ID);
@@ -26,11 +25,14 @@ class ValueQueryBuilder {
     private final Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone(UTC_TIMEZONE_ID));
     private final StringBuilder builder = new StringBuilder();
     private final SqlDialect dialect;
+    private final List<DataType> selectListDataTypes;
     private final ResultSet resultSet;
     private final ResultSetMetaData metaData;
 
-    ValueQueryBuilder(final SqlDialect dialect, final ResultSet resultSet) throws SQLException {
+    ValueQueryBuilder(final SqlDialect dialect, final List<DataType> selectListDataTypes, final ResultSet resultSet)
+            throws SQLException {
         this.dialect = dialect;
+        this.selectListDataTypes = selectListDataTypes;
         this.resultSet = resultSet;
         this.metaData = resultSet.getMetaData();
         builder.append("SELECT * FROM VALUES");
@@ -48,112 +50,117 @@ class ValueQueryBuilder {
         }
         final int columnCount = metaData.getColumnCount();
         builder.append(" (");
-        for (int i = 1; i <= columnCount; ++i) {
-            final String columnName = metaData.getColumnName(i);
-            if (i > 1) {
+        for (int col = 1; col <= columnCount; ++col) {
+            if (col > 1) {
                 builder.append(", ");
             }
-            appendColumnValue(columnName, metaData.getColumnType(i), metaData.getColumnTypeName(i));
+            appendColumnValue(rowNumber, col);
         }
         builder.append(")");
     }
 
-    private void appendColumnValue(final String columnName, final int type, final String typeName) throws SQLException {
-        LOGGER.fine(() -> "Mapping column " + columnName + " of type " + type + "/" + typeName);
+    private void appendColumnValue(final int rowNumber, final int columnNumber) throws SQLException {
+        final String columnName = metaData.getColumnName(columnNumber);
+        final JDBCType type = JDBCType.valueOf(metaData.getColumnType(columnNumber));
+        final String typeName = metaData.getColumnTypeName(columnNumber);
+        final DataType expectedExasolType = selectListDataTypes.get(columnNumber - 1);
+        LOGGER.info(() -> "Mapping row " + rowNumber + " / column '" + columnName + "' (" + columnNumber + ") of type "
+                + type + " (" + type.getVendorTypeNumber() + ") / type name '" + typeName + "', expected type "
+                + expectedExasolType);
+
+        System.out.println("Mapping row " + rowNumber + " / column '" + columnName + "' (" + columnNumber + ") of type "
+                + type + " (" + type.getVendorTypeNumber() + ") / type name '" + typeName + "', expected type "
+                + expectedExasolType);
 
         if ("GEOGRAPHY".equals(typeName)) {
-            appendGeometry(columnName);
+            appendGeometry(columnName, expectedExasolType);
             return;
         }
 
         switch (type) {
-        case Types.BIGINT:
-        case Types.INTEGER:
-            appendBigInt(columnName);
+        case BIGINT:
+        case INTEGER:
+            appendBigInt(columnName, expectedExasolType);
             break;
-        case Types.DECIMAL:
-        case Types.NUMERIC:
-        case Types.DOUBLE:
-            appendDouble(columnName);
+        case DECIMAL:
+        case NUMERIC:
+        case DOUBLE:
+            appendDouble(columnName, expectedExasolType);
             break;
-        case Types.BOOLEAN:
-            appendBoolean(columnName);
+        case BOOLEAN:
+            appendBoolean(columnName, expectedExasolType);
             break;
-        case Types.DATE:
-            appendDate(columnName);
+        case DATE:
+            appendDate(columnName, expectedExasolType);
             break;
-        case Types.TIMESTAMP:
-            appendTimestamp(columnName);
+        case TIMESTAMP:
+            appendTimestamp(columnName, expectedExasolType);
             break;
-        case Types.VARCHAR:
-        case Types.CHAR:
-            appendVarchar(columnName);
+        case VARCHAR:
+        case CHAR:
+            appendVarchar(columnName, expectedExasolType);
             break;
-        case Types.TIME:
-            appendVarchar(columnName);
+        case TIME:
+            appendVarchar(columnName, expectedExasolType);
             break;
-        case Types.VARBINARY:
+        case VARBINARY:
         default:
             LOGGER.info(
                     () -> "Mapping unknown column " + columnName + " of type " + type + "/" + typeName + " to string");
-            appendString(columnName);
+            appendString(columnName, expectedExasolType);
             break;
         }
     }
 
-    private void appendVarchar(final String columnName) throws SQLException {
-        final String stringLiteral = this.dialect.getStringLiteral(resultSet.getString(columnName));
-        builder.append(resultSet.wasNull() ? CAST_NULL_AS_VARCHAR_4 : stringLiteral);
+    private void appendVarchar(final String columnName, final DataType dataType) throws SQLException {
+        appendString(columnName, dataType);
     }
 
-    private void appendGeometry(final String columnName) throws SQLException {
-        String value = resultSet.getString(columnName);
-        value = resultSet.wasNull() ? "NULL" : "'" + value + "'";
-        builder.append(CAST + " (" + value + " AS GEOMETRY)");
-    }
-
-    private void appendBigInt(final String columnName) throws SQLException {
-        final String string = resultSet.getString(columnName);
-        builder.append(resultSet.wasNull() ? CAST + " (NULL AS DECIMAL(19,0))" : new BigInteger(string));
-    }
-
-    private void appendDouble(final String columnName) throws SQLException {
-        final double value = resultSet.getDouble(columnName);
-        builder.append(resultSet.wasNull() ? CAST + " (NULL AS DOUBLE)" : value);
-    }
-
-    private void appendBoolean(final String columnName) throws SQLException {
-        final boolean value = resultSet.getBoolean(columnName);
-        builder.append(resultSet.wasNull() ? CAST + " (NULL AS BOOLEAN)" : value);
-    }
-
-    private void appendDate(final String columnName) throws SQLException {
-        final Date date = resultSet.getDate(columnName, this.utcCalendar);
-        if (date == null) {
-            builder.append(CAST + " (NULL AS DATE)");
-        } else {
-            builder.append(CAST + "('" + DATE_FORMATTER.format(date.toLocalDate()) + "' AS DATE)");
-        }
-    }
-
-    private void appendTimestamp(final String columnName) throws SQLException {
-        final Timestamp timestamp = resultSet.getTimestamp(columnName, this.utcCalendar);
-        if (timestamp == null) {
-            builder.append(CAST + " (NULL AS TIMESTAMP)");
-        } else {
-            builder.append("CAST ('");
-            builder.append(TIMESTAMP_FORMATTER.format(timestamp.toInstant()));
-            builder.append("' AS TIMESTAMP)");
-        }
-    }
-
-    private void appendString(final String columnName) throws SQLException {
+    private void appendGeometry(final String columnName, final DataType dataType) throws SQLException {
         final String value = resultSet.getString(columnName);
-        if (value == null) {
-            builder.append(CAST_NULL_AS_VARCHAR_4);
-        } else {
-            builder.append(this.dialect.getStringLiteral(value));
-        }
+        final String literal = resultSet.wasNull() ? "NULL" : "'" + value + "'";
+        builder.append(castType(literal, dataType));
+    }
+
+    private void appendBigInt(final String columnName, final DataType dataType) throws SQLException {
+        final String string = resultSet.getString(columnName);
+        final String literal = resultSet.wasNull() ? "NULL" : new BigInteger(string).toString(10);
+        builder.append(castType(literal, dataType));
+    }
+
+    private void appendDouble(final String columnName, final DataType dataType) throws SQLException {
+        final double value = resultSet.getDouble(columnName);
+        final String literal = resultSet.wasNull() ? "NULL" : String.valueOf(value);
+        builder.append(castType(literal, dataType));
+    }
+
+    private void appendBoolean(final String columnName, final DataType dataType) throws SQLException {
+        final boolean value = resultSet.getBoolean(columnName);
+        final String literal = resultSet.wasNull() ? "NULL" : String.valueOf(value);
+        builder.append(castType(literal, dataType));
+    }
+
+    private void appendDate(final String columnName, final DataType dataType) throws SQLException {
+        final Date date = resultSet.getDate(columnName, this.utcCalendar);
+        final String literal = date == null ? "NULL" : String.format("'%s'", DATE_FORMATTER.format(date.toLocalDate()));
+        builder.append(castType(literal, dataType));
+    }
+
+    private void appendTimestamp(final String columnName, final DataType dataType) throws SQLException {
+        final Timestamp timestamp = resultSet.getTimestamp(columnName, this.utcCalendar);
+        final String literal = timestamp == null ? "NULL"
+                : String.format("'%s'", TIMESTAMP_FORMATTER.format(timestamp.toInstant()));
+        builder.append(castType(literal, dataType));
+    }
+
+    private String castType(final String literal, final DataType type) {
+        return String.format("CAST(%s as %s)", literal, type.toString());
+    }
+
+    private void appendString(final String columnName, final DataType dataType) throws SQLException {
+        final String value = resultSet.getString(columnName);
+        final String literal = value == null ? "NULL" : this.dialect.getStringLiteral(value);
+        builder.append(castType(literal, dataType));
     }
 
     /**
@@ -166,10 +173,24 @@ class ValueQueryBuilder {
         builder.append("(");
         final StringJoiner joiner = new StringJoiner(", ");
         for (int i = 0; i < columnCounter; i++) {
-            joiner.add("1");
+            final DataType type = selectListDataTypes.get(i);
+            joiner.add(castType(getDummyLiteral(type), type));
         }
         builder.append(joiner.toString());
         builder.append(") WHERE false");
+    }
+
+    private String getDummyLiteral(final DataType type) {
+        switch (type.getExaDataType()) {
+        case DATE:
+            return "'0001-01-01'";
+        case TIMESTAMP:
+            return "'0001-01-01 00:00:00'";
+        case GEOMETRY:
+            return "'POINT(0 0)'";
+        default:
+            return "1";
+        }
     }
 
     /**

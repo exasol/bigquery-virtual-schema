@@ -43,7 +43,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
         LOGGER.fine(() -> "Query to rewrite: '" + query + "'");
         try (final ResultSet resultSet = this.connectionFactory.getConnection().createStatement().executeQuery(query)) {
             int rowNumber = 0;
-            final ValueQueryBuilder rewriter = new ValueQueryBuilder(dialect, resultSet);
+            final ValueQueryBuilder rewriter = new ValueQueryBuilder(dialect, selectListDataTypes, resultSet);
             while (resultSet.next()) {
                 rewriter.appendRow(rowNumber);
                 ++rowNumber;
