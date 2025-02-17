@@ -40,8 +40,6 @@ import com.exasol.adapter.sql.SqlStatement;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
 
-    private static final List<DataType> EMPTY_SELECT_LIST_DATA_TYPES = List.of();
-
     private QueryRewriter queryRewriter;
     @Mock
     private ResultSet mockResultSet;
