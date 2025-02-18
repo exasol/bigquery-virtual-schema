@@ -40,10 +40,10 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
     public String rewrite(final SqlStatement statement, final List<DataType> selectListDataTypes,
             final ExaMetadata exaMetadata, final AdapterProperties properties) throws AdapterException, SQLException {
         final String query = getQueryFromStatement(statement, properties);
-        LOGGER.fine(() -> "Query to rewrite: '" + query + "'");
+        LOGGER.fine(() -> String.format("Query to rewrite: '%s'", query));
         try (final ResultSet resultSet = this.connectionFactory.getConnection().createStatement().executeQuery(query)) {
             int rowNumber = 0;
-            final ValueQueryBuilder rewriter = new ValueQueryBuilder(dialect, resultSet);
+            final ValueQueryBuilder rewriter = new ValueQueryBuilder(dialect, selectListDataTypes, resultSet);
             while (resultSet.next()) {
                 rewriter.appendRow(rowNumber);
                 ++rowNumber;
@@ -52,7 +52,7 @@ public class BigQueryQueryRewriter extends ImportIntoTemporaryTableQueryRewriter
                 rewriter.appendQueryForEmptyTable();
             }
             final String rewrittenQuery = rewriter.getQuery();
-            LOGGER.fine(() -> "Rewritten query: '" + rewrittenQuery + "'");
+            LOGGER.fine(() -> String.format("Rewritten query: '%s'", rewrittenQuery));
             return rewrittenQuery;
         }
     }

@@ -1,4 +1,4 @@
-# Virtual Schema for BigQuery 3.0.5, released 2024-02-17
+# Virtual Schema for BigQuery 3.0.5, released 2025-02-18
 
 Code name: Adapt to new Exasol version and fix CVE-2025-25193 and CVE-2025-24970 in test dependencies
 

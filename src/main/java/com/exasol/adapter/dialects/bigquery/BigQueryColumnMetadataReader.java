@@ -30,6 +30,12 @@ public class BigQueryColumnMetadataReader extends BaseColumnMetadataReader {
         if (jdbcTypeDescription.getJdbcType() == Types.TIME) {
             return DataType.createVarChar(30, DataType.ExaCharset.UTF8);
         }
+        if (jdbcTypeDescription.getJdbcType() == Types.NUMERIC) {
+            return DataType.createDouble();
+        }
+        if (jdbcTypeDescription.getTypeName().equals("GEOGRAPHY")) {
+            return DataType.createGeometry(0);
+        }
         return super.mapJdbcType(jdbcTypeDescription);
     }
 }

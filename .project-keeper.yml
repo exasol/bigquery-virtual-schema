@@ -12,3 +12,18 @@ build:
   exasolDbVersions:
     - "8.32.0"
     - "7.1.30"
+  workflows:
+    - name: ci-build.yml
+      stepCustomizations:
+        - action: INSERT_AFTER
+          job: matrix-build
+          stepId: enable-testcontainer-reuse
+          content:
+            name: Create test.properties
+            id: create-test-config
+            run: |
+              echo "${{ secrets.GCS_SERVICE_ACCOUNT_KEY_JSON_BASE64 }}" > google-service-account-key.base64
+              cat google-service-account-key.base64 | base64 --decode > google-service-account-key.json
+              echo "serviceAccountEmail = ${{ secrets.GCS_SERVICE_ACCOUNT_EMAIL }}" > test.properties
+              echo "googleProjectId = ${{ secrets.GCS_PROJECT_ID }}" >> test.properties
+              echo "privateKeyPath = google-service-account-key.json" >> test.properties

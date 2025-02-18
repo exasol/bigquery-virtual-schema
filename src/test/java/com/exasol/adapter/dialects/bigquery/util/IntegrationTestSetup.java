@@ -1,5 +1,7 @@
 package com.exasol.adapter.dialects.bigquery.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -60,10 +62,11 @@ public class IntegrationTestSetup implements AutoCloseable {
             System.setProperty("test.udf-logs", "true");
         }
         final BigQueryTestSetup bigQueryTestSetup = createBigQueryTestSetup(config);
+        assertNotNull(bigQueryTestSetup.getClient());
         bigQueryTestSetup.start();
+        final ExasolTestSetup exasolTestSetup = new ExasolTestSetupFactory(
+                Path.of("cloudSetup/generated/testConfig.json")).getTestSetup();
         try {
-            final ExasolTestSetup exasolTestSetup = new ExasolTestSetupFactory(
-                    Path.of("cloudSetup/generated/testConfig.json")).getTestSetup();
             return new IntegrationTestSetup(bigQueryTestSetup, exasolTestSetup);
         } catch (SQLException | BucketAccessException | TimeoutException | IOException exception) {
             throw new IllegalStateException("Failed to create test setup: " + exception.getMessage(), exception);
