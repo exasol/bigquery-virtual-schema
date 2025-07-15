@@ -63,7 +63,7 @@
 [3]: https://github.com/exasol/error-reporting-java/blob/main/LICENSE
 [4]: http://hamcrest.org/JavaHamcrest/
 [5]: https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE
-[6]: https://junit.org/junit5/
+[6]: https://junit.org/
 [7]: https://www.eclipse.org/legal/epl-v20.html
 [8]: https://github.com/mockito/mockito
 [9]: https://opensource.org/licenses/MIT
