@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>bigquery-virtual-schema</artifactId>
-    <version>3.0.5</version>
+    <version>3.0.6</version>
     <name>Virtual Schema for BigQuery</name>
     <description>Virtual Schema for connecting Big Query as a data source to Exasol</description>
     <properties>
@@ -137,7 +137,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>4.5.0</version>
+                <version>5.2.3</version>
                 <executions>
                     <execution>
                         <goals>
@@ -172,7 +172,6 @@
                 <artifactId>ossindex-maven-plugin</artifactId>
                 <configuration>
                     <excludeVulnerabilityIds>
-                        
                         <!-- Transitive dependency org.threeten:threetenbp:jar:1.6.8:test. We assume that google-cloud-storage uses the library correctly.-->
                         <exclude>CVE-2024-23081</exclude>
                         <!-- Transitive dependency org.threeten:threetenbp:jar:1.6.8:test. We assume that google-cloud-storage uses the library correctly.-->
@@ -196,7 +195,7 @@
     <parent>
         <artifactId>bigquery-virtual-schema-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>3.0.5</version>
+        <version>3.0.6</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
