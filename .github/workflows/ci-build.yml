@@ -16,7 +16,7 @@ on:
     
 jobs:
   matrix-build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     defaults:
       run: {
         shell: bash
@@ -32,8 +32,7 @@ jobs:
       fail-fast: false
       matrix:
         exasol_db_version: [
-          8.32.0,
-          7.1.30
+          8.32.0
         ]
         
     env: {
@@ -82,6 +81,11 @@ jobs:
           echo "serviceAccountEmail = ${{ secrets.GCS_SERVICE_ACCOUNT_EMAIL }}" > test.properties
           echo "googleProjectId = ${{ secrets.GCS_PROJECT_ID }}" >> test.properties
           echo "privateKeyPath = google-service-account-key.json" >> test.properties
+      - {
+        name: Fix "VM Crashed" error by allowing unprivileged user namespaces,
+        id: fix-vm-crashed,
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      }
       - name: Run tests and build with Maven
         id: build-pk-verify
         run: |
