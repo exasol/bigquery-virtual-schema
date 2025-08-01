@@ -10,6 +10,19 @@ Code name:
 
 ## Dependency Updates
 
+### Test Dependency Updates
+
+* Updated `com.exasol:exasol-test-setup-abstraction-java:2.1.7` to `2.1.8`
+* Updated `com.exasol:hamcrest-resultset-matcher:1.7.0` to `1.7.1`
+* Updated `com.exasol:test-db-builder-java:3.6.0` to `3.6.2`
+* Updated `com.exasol:udf-debugging-java:0.6.15` to `0.6.17`
+* Updated `com.google.cloud:google-cloud-bigquery:2.48.0` to `2.54.0`
+* Added `org.junit.jupiter:junit-jupiter-params:5.13.4`
+* Removed `org.junit.jupiter:junit-jupiter:5.11.4`
+* Updated `org.mockito:mockito-junit-jupiter:5.15.2` to `5.18.0`
+* Updated `org.testcontainers:jdbc:1.20.4` to `1.21.3`
+* Updated `org.testcontainers:junit-jupiter:1.20.4` to `1.21.3`
+
 ### Plugin Dependency Updates
 
 * Updated `com.exasol:artifact-reference-checker-maven-plugin:0.4.2` to `0.4.3`

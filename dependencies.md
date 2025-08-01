@@ -14,7 +14,7 @@
 | ----------------------------------------------- | -------------------------------- |
 | [Virtual Schema Common JDBC][0]                 | [MIT License][1]                 |
 | [Hamcrest][4]                                   | [BSD-3-Clause][5]                |
-| [JUnit Jupiter (Aggregator)][6]                 | [Eclipse Public License v2.0][7] |
+| [JUnit Jupiter Params][6]                       | [Eclipse Public License v2.0][7] |
 | [mockito-junit-jupiter][8]                      | [MIT][9]                         |
 | [Testcontainers :: JUnit Jupiter Extension][10] | [MIT][11]                        |
 | [Testcontainers :: JDBC][10]                    | [MIT][11]                        |
@@ -64,7 +64,7 @@
 [3]: https://github.com/exasol/error-reporting-java/blob/main/LICENSE
 [4]: http://hamcrest.org/JavaHamcrest/
 [5]: https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE
-[6]: https://junit.org/junit5/
+[6]: https://junit.org/
 [7]: https://www.eclipse.org/legal/epl-v20.html
 [8]: https://github.com/mockito/mockito
 [9]: https://opensource.org/licenses/MIT
