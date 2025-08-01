@@ -6,15 +6,21 @@ sources:
       - jar_artifact
 linkReplacements:
 build:
-  # UDFs in Exasol 7.1 require Ubuntu 20.04
-  runnerOs: ubuntu-20.04
+  runnerOs: ubuntu-24.04
   freeDiskSpace: false
   exasolDbVersions:
     - "8.32.0"
-    - "7.1.30"
+    # - "7.1.30" # Exasol 7.1.x does not yet support Ubuntu versions later than 20.04
   workflows:
     - name: ci-build.yml
       stepCustomizations:
+        - action: INSERT_AFTER
+          job: matrix-build
+          stepId: enable-testcontainer-reuse
+          content:
+            name: Fix "VM Crashed" error by allowing unprivileged user namespaces
+            id: fix-vm-crashed
+            run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
         - action: INSERT_AFTER
           job: matrix-build
           stepId: enable-testcontainer-reuse
