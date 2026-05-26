@@ -49,10 +49,9 @@ public class GoogleCloudBigQuerySetup implements BigQueryTestSetup {
 
     @Override
     public String getJdbcUrl(final Bucket bucket, final InetSocketAddress serviceAddress) {
-        final String url = "https://" + serviceAddress.getHostName() + ":" + serviceAddress.getPort();
         final String bucketFsCredentialsPath = uploadCredentials(bucket);
-        return "jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;RootURL=" + url + ";ProjectId="
-                + getProjectId() + ";OAuthType=0;OAuthServiceAcctEmail="
+        return "jdbc:bigquery://https://" + serviceAddress.getHostName() + "/bigquery/v2:"
+                + serviceAddress.getPort() + ";ProjectId=" + getProjectId() + ";OAuthType=0;OAuthServiceAcctEmail="
                 + config.getGoogleCloudCredentials().serviceAccountEmail + ";OAuthPvtKeyPath="
                 + bucketFsCredentialsPath;
     }

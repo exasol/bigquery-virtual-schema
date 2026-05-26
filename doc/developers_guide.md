@@ -24,6 +24,8 @@ If file `test.properties` or one of `googleProjectId`, `serviceAccountEmail`, or
 
 When `udfLoggingEnabled` is set to `true`, UDF logs will be written to `target/udf-logs/*.txt`.
 
+The Google Cloud integration test setup uses the standard Simba BigQuery JDBC URL without the `RootURL` connection property. Simba JDBC driver 1.7 treats `RootURL` as a Private Service Connect endpoint and can fail during authentication or universe domain validation when it is used for the regular Google Cloud endpoint.
+
 ## Running Integration Tests Against BigQuery Emulator
 
 As long as the emulator is not yet ready you need to manually enable it.
