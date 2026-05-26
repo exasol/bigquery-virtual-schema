@@ -15,8 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectFactory;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.sql.*;
@@ -28,8 +27,8 @@ class BigQueryGenerationVisitorTest {
     @BeforeEach
     void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) {
         final SqlDialectFactory dialectFactory = new BigQuerySqlDialectFactory();
-        final SqlDialect dialect = dialectFactory.createSqlDialect(connectionFactoryMock,
-                AdapterProperties.emptyProperties());
+        final SqlDialect dialect = dialectFactory.createSqlDialect(
+                JDBCAdapterContext.builder().properties(AdapterProperties.emptyProperties()).connectionFactory(connectionFactoryMock).build());
         final SqlGenerationContext context = new SqlGenerationContext("test_catalog", "test_schema", false);
         this.visitor = new BigQueryGenerationVisitor(dialect, context);
     }

@@ -19,8 +19,8 @@ import com.google.cloud.bigquery.BigQueryOptions;
  */
 class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContainer> implements BigQueryTestSetup {
     private static final Logger LOGGER = Logger.getLogger(BigQueryEmulatorContainer.class.getName());
-    private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName
-            .parse("ghcr.io/goccy/bigquery-emulator:0.6.6");
+    // https://github.com/goccy/bigquery-emulator/releases
+    private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse("ghcr.io/goccy/bigquery-emulator:0.7.2");
     private static final int PORT = 9050;
     private static final String PROJECT_ID = "test";
     private Path dataYaml;

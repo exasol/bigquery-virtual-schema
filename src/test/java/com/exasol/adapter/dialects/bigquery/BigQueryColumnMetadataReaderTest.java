@@ -24,7 +24,7 @@ class BigQueryColumnMetadataReaderTest {
 
     @BeforeEach
     void beforeEach() {
-        this.columnMetadataReader = new BigQueryColumnMetadataReader(null, AdapterProperties.emptyProperties(),
+        this.columnMetadataReader = new BigQueryColumnMetadataReader(null, AdapterProperties.emptyProperties(), null,
                 BaseIdentifierConverter.createDefault());
     }
 

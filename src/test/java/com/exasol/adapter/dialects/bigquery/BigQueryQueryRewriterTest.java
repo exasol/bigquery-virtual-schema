@@ -56,9 +56,10 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
         this.statement = Mockito.mock(SqlStatement.class);
         when(connectionFactoryMock.getConnection()).thenReturn(connectionMock);
         final SqlDialectFactory factory = new BigQuerySqlDialectFactory();
-        final SqlDialect dialect = factory.createSqlDialect(connectionFactoryMock, AdapterProperties.emptyProperties());
+        final SqlDialect dialect = factory.createSqlDialect(
+                JDBCAdapterContext.builder().properties(AdapterProperties.emptyProperties()).connectionFactory(connectionFactoryMock).build());
         final BaseRemoteMetadataReader metadataReader = new BaseRemoteMetadataReader(connectionMock,
-                AdapterProperties.emptyProperties());
+                AdapterProperties.emptyProperties(), exaMetadata);
         this.queryRewriter = new BigQueryQueryRewriter(dialect, metadataReader, connectionFactoryMock);
         when(connectionMock.createStatement()).thenReturn(this.mockStatement);
         when(this.mockResultSet.getMetaData()).thenReturn(this.mockResultSetMetaData);
@@ -93,8 +94,8 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
                 Arguments.of(DataType.createGeometry(0), "CAST ('POINT(0 0)' AS GEOMETRY(0))"),
                 Arguments.of(DataType.createGeometry(42), "CAST ('POINT(0 0)' AS GEOMETRY(42))"),
                 Arguments.of(DataType.createDate(), "CAST ('0001-01-01' AS DATE)"),
-                Arguments.of(DataType.createTimestamp(false), "CAST ('0001-01-01 00:00:00' AS TIMESTAMP)"),
-                Arguments.of(DataType.createTimestamp(true),
+                Arguments.of(DataType.createTimestamp(false, 3), "CAST ('0001-01-01 00:00:00' AS TIMESTAMP)"),
+                Arguments.of(DataType.createTimestamp(true, 3),
                         "CAST ('0001-01-01 00:00:00' AS TIMESTAMP WITH LOCAL TIME ZONE)")
 
         );
@@ -228,7 +229,7 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
             throws AdapterException, SQLException {
         when(this.mockResultSet.getTimestamp(eq("col_timestamp"), any(Calendar.class)))
                 .thenReturn(new Timestamp(valueToConvert.toEpochMilli()));
-        assertQueryWithOneColumn(DataType.createTimestamp(false), "col_timestamp", JDBCType.TIMESTAMP, null,
+        assertQueryWithOneColumn(DataType.createTimestamp(false, 3), "col_timestamp", JDBCType.TIMESTAMP, null,
                 "SELECT * FROM VALUES (CAST ('" + expectedValue + "' AS TIMESTAMP))");
     }
 
@@ -300,7 +301,7 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
     @Test
     void testRewriteTimestampWithValueNull() throws AdapterException, SQLException {
         mockOneRowWithOneColumnOfType(JDBCType.TIMESTAMP);
-        assertThat(rewrite(DataType.createTimestamp(false)),
+        assertThat(rewrite(DataType.createTimestamp(false, 3)),
                 equalTo("SELECT * FROM VALUES (CAST (NULL AS TIMESTAMP))"));
     }
 
