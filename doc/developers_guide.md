@@ -6,7 +6,7 @@ This guide contains information for developers.
 
 Integration tests are prepared to use a local [bigquery-emulator](https://github.com/goccy/bigquery-emulator), but the emulator does not yet support all required features. Until this is finished it's only possible to run integration tests against BigQuery in Google Cloud:
 
-1. Login to Google Cloud
+1. Login to [Google Cloud](https://console.cloud.google.com)
 2. Go to "IAM > Service Accounts" and create a Service Account and download the private key as JSON file. Store JSON file as `google-service-account-key.json`.
 3. Go to "IAM > Roles" and create a new role with permissions `bigquery.datasets.create` and `bigquery.jobs.create`. Set "Role launch stage" to "General Availability".
 4. Go to "IAM > IAM", click "Grant Access", select the service account as principal, select the role and click "Save".
