@@ -24,6 +24,17 @@ class BigQuerySqlDialectFactoryTest {
     }
 
     @Test
+    void testGetSqlDialectVersion() {
+        // Only works in built artifact
+        assertThat(this.factory.getSqlDialectVersion(), equalTo("UNKNOWN"));
+    }
+
+    @Test
+    void testGetAdapterProjectShortTag() {
+        assertThat(this.factory.getAdapterProjectShortTag(), equalTo("VSBIGQ"));
+    }
+
+    @Test
     void testCreateDialect() {
         assertThat(this.factory.createSqlDialect(JDBCAdapterContext.builder().properties(AdapterProperties.emptyProperties()).build()),
                 instanceOf(BigQuerySqlDialect.class));
