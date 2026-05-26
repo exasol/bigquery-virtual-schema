@@ -10,6 +10,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 import com.exasol.bucketfs.Bucket;
+import com.google.cloud.NoCredentials;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 
@@ -36,7 +37,7 @@ class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContain
         withExposedPorts(PORT);
         final String dataOption = dataYaml == null ? "" : " --data-from-yaml" + dataYaml.toAbsolutePath().toString();
         withCommand("/bin/bigquery-emulator --project=" + PROJECT_ID + " --port=" + PORT + dataOption);
-        waitingFor(Wait.forLogMessage("^\\[bigquery-emulator\\] REST server listening at 0\\.0\\.0\\.0:" + PORT + ".*",
+        waitingFor(Wait.forLogMessage("^\\[bigquery-emulator\\] REST server listening at \\[::\\]:" + PORT + ".*",
                 1));
         withStartupTimeout(Duration.ofSeconds(10));
         withStartupAttempts(1);
@@ -57,7 +58,9 @@ class BigQueryEmulatorContainer extends GenericContainer<BigQueryEmulatorContain
         final String url = getUrl();
         final String projectId = getProjectId();
         LOGGER.fine(() -> "Connecting to bigquery at " + url + " with project id '" + projectId + "'");
-        return BigQueryOptions.newBuilder().setHost(url).setLocation(url).setProjectId(projectId).build().getService();
+        return BigQueryOptions.newBuilder().setHost(url).setLocation(url).setProjectId(projectId)
+                .setCredentials(NoCredentials.getInstance()).build()
+                .getService();
     }
 
     @Override

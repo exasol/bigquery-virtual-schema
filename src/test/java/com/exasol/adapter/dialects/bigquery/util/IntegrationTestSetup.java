@@ -62,8 +62,8 @@ public class IntegrationTestSetup implements AutoCloseable {
             System.setProperty("test.udf-logs", "true");
         }
         final BigQueryTestSetup bigQueryTestSetup = createBigQueryTestSetup(config);
-        assertNotNull(bigQueryTestSetup.getClient());
         bigQueryTestSetup.start();
+        assertNotNull(bigQueryTestSetup.getClient());
         final ExasolTestSetup exasolTestSetup = new ExasolTestSetupFactory(
                 Path.of("cloudSetup/generated/testConfig.json")).getTestSetup();
         try {
