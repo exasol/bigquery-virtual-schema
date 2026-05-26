@@ -30,8 +30,8 @@ public class GoogleCloudBigQuerySetup implements BigQueryTestSetup {
 
     private Credentials createGoogleCredentials() {
         final Path privateKey = config.getGoogleCloudCredentials().privateKey;
-        try {
-            return GoogleCredentials.fromStream(Files.newInputStream(privateKey));
+        try (InputStream inputStream = Files.newInputStream(privateKey)) {
+            return GoogleCredentials.fromStream(inputStream);
         } catch (final IOException exception) {
             throw new UncheckedIOException("Failed to load credentials from " + privateKey, exception);
         }
@@ -59,20 +59,20 @@ public class GoogleCloudBigQuerySetup implements BigQueryTestSetup {
 
     private String uploadCredentials(final Bucket bucket) {
         final Path privateKey = config.getGoogleCloudCredentials().privateKey;
+        final String filename = privateKey.getFileName().toString();
         try {
-            final String filename = privateKey.getFileName().toString();
             bucket.uploadFile(privateKey, filename);
             return IntegrationTestSetup.BUCKETFS_ROOT_PATH + filename;
         } catch (FileNotFoundException | BucketAccessException | TimeoutException exception) {
-            throw new IllegalStateException("Failed to upload google cloud credentials", exception);
+            throw new IllegalStateException("Failed to upload google cloud credentials to " + filename, exception);
         }
     }
 
-    public static class GoogleCloudCredentials {
+    static class GoogleCloudCredentials {
         private final String serviceAccountEmail;
         private final Path privateKey;
 
-        public GoogleCloudCredentials(final String serviceAccountEmail, final Path privateKey) {
+        GoogleCloudCredentials(final String serviceAccountEmail, final Path privateKey) {
             this.serviceAccountEmail = serviceAccountEmail;
             this.privateKey = privateKey;
         }
