@@ -9,8 +9,8 @@ build:
   runnerOs: ubuntu-24.04
   freeDiskSpace: false
   exasolDbVersions:
-    - "8.32.0"
-    # - "7.1.30" # Exasol 7.1.x does not yet support Ubuntu versions later than 20.04
+    - "2026.1.0"
+    - "2025.1.10"
   workflows:
     - name: ci-build.yml
       stepCustomizations:
@@ -28,8 +28,12 @@ build:
             name: Create test.properties
             id: create-test-config
             run: |
-              echo "${{ secrets.GCS_SERVICE_ACCOUNT_KEY_JSON_BASE64 }}" > google-service-account-key.base64
+              echo "$GCS_SERVICE_ACCOUNT_KEY_JSON_BASE64" > google-service-account-key.base64
               cat google-service-account-key.base64 | base64 --decode > google-service-account-key.json
-              echo "serviceAccountEmail = ${{ secrets.GCS_SERVICE_ACCOUNT_EMAIL }}" > test.properties
-              echo "googleProjectId = ${{ secrets.GCS_PROJECT_ID }}" >> test.properties
+              echo "serviceAccountEmail = $GCS_SERVICE_ACCOUNT_EMAIL" > test.properties
+              echo "googleProjectId = $GCS_PROJECT_ID" >> test.properties
               echo "privateKeyPath = google-service-account-key.json" >> test.properties
+            env:
+              GCS_SERVICE_ACCOUNT_KEY_JSON_BASE64: ${{ secrets.GCS_SERVICE_ACCOUNT_KEY_JSON_BASE64 }}
+              GCS_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GCS_SERVICE_ACCOUNT_EMAIL }}
+              GCS_PROJECT_ID: ${{ secrets.GCS_PROJECT_ID }}

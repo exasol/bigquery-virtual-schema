@@ -3,6 +3,7 @@ package com.exasol.adapter.dialects.bigquery;
 import java.sql.Connection;
 import java.sql.Types;
 
+import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
@@ -18,11 +19,12 @@ public class BigQueryColumnMetadataReader extends BaseColumnMetadataReader {
      *
      * @param connection          connection to the remote data source
      * @param properties          user-defined adapter properties
+     * @param metadata            metadata of the Exasol database
      * @param identifierConverter converter between source and Exasol identifiers
      */
-    public BigQueryColumnMetadataReader(final Connection connection, final AdapterProperties properties,
+    public BigQueryColumnMetadataReader(final Connection connection, final AdapterProperties properties, final ExaMetadata metadata,
             final IdentifierConverter identifierConverter) {
-        super(connection, properties, identifierConverter);
+        super(connection, properties, metadata, identifierConverter);
     }
 
     @Override

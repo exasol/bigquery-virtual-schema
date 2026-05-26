@@ -6,7 +6,7 @@ This guide contains information for developers.
 
 Integration tests are prepared to use a local [bigquery-emulator](https://github.com/goccy/bigquery-emulator), but the emulator does not yet support all required features. Until this is finished it's only possible to run integration tests against BigQuery in Google Cloud:
 
-1. Login to Google Cloud
+1. Login to [Google Cloud](https://console.cloud.google.com)
 2. Go to "IAM > Service Accounts" and create a Service Account and download the private key as JSON file. Store JSON file as `google-service-account-key.json`.
 3. Go to "IAM > Roles" and create a new role with permissions `bigquery.datasets.create` and `bigquery.jobs.create`. Set "Role launch stage" to "General Availability".
 4. Go to "IAM > IAM", click "Grant Access", select the service account as principal, select the role and click "Save".
@@ -24,9 +24,13 @@ If file `test.properties` or one of `googleProjectId`, `serviceAccountEmail`, or
 
 When `udfLoggingEnabled` is set to `true`, UDF logs will be written to `target/udf-logs/*.txt`.
 
+The Google Cloud integration test setup uses the standard Simba BigQuery JDBC URL without the `RootURL` connection property. Simba JDBC driver 1.7 treats `RootURL` as a Private Service Connect endpoint and can fail during authentication or universe domain validation when it is used for the regular Google Cloud endpoint.
+
 ## Running Integration Tests Against BigQuery Emulator
 
 As long as the emulator is not yet ready you need to manually enable it.
+
+The Simba JDBC driver 1.7 validates the `RootURL` connection property as a Private Service Connect BigQuery URI and rejects the emulator's plain HTTP endpoint with `[Simba][BigQueryJDBCDriver](100007) Failed to retrieve: PSC end point does not have correct value.`.
 
 1. Remove `test.properties` or one of the properties `googleProjectId`, `serviceAccountEmail`, or `privateKeyPath` in the file.
 2. Remove the `assumeTrue` call from `BigQueryVirtualSchemaIT.beforeAll()`.

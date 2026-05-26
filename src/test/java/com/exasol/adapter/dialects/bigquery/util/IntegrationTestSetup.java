@@ -24,7 +24,7 @@ import com.google.cloud.bigquery.BigQuery;
 
 public class IntegrationTestSetup implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(IntegrationTestSetup.class.getName());
-    private static final String ADAPTER_JAR = "virtual-schema-dist-12.0.0-bigquery-3.0.6.jar";
+    private static final String ADAPTER_JAR = "virtual-schema-dist-14.0.2-bigquery-4.0.0.jar";
     public static final String BUCKETFS_ROOT_PATH = "/buckets/bfsdefault/default/";
     public static final Path ADAPTER_JAR_LOCAL_PATH = Path.of("target", ADAPTER_JAR);
 
@@ -62,8 +62,8 @@ public class IntegrationTestSetup implements AutoCloseable {
             System.setProperty("test.udf-logs", "true");
         }
         final BigQueryTestSetup bigQueryTestSetup = createBigQueryTestSetup(config);
-        assertNotNull(bigQueryTestSetup.getClient());
         bigQueryTestSetup.start();
+        assertNotNull(bigQueryTestSetup.getClient());
         final ExasolTestSetup exasolTestSetup = new ExasolTestSetupFactory(
                 Path.of("cloudSetup/generated/testConfig.json")).getTestSetup();
         try {
@@ -102,8 +102,9 @@ public class IntegrationTestSetup implements AutoCloseable {
     @NotNull
     private String[] getAdapterJarsInBucketFs() {
         final JdbcDriverProvider uploader = new JdbcDriverProvider(getBucket());
+        // See latest version: https://docs.cloud.google.com/bigquery/docs/reference/odbc-jdbc-drivers
         final List<String> jarFiles = uploader.uploadJdbcDriverToBucketFs(
-                "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.6.2.1003.zip");
+                "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.7.0.1001.zip");
         final List<String> jars = new ArrayList<>();
         jars.add(BUCKETFS_ROOT_PATH + ADAPTER_JAR);
         jars.addAll(jarFiles);
@@ -125,7 +126,7 @@ public class IntegrationTestSetup implements AutoCloseable {
                 .connectionDefinition(this.connectionDefinition) //
                 .adapterScript(this.adapterScript) //
                 .sourceSchemaName(this.bigQueryDataset.getDatasetId().getDataset()) //
-                .properties(getVirtualSchemaProperties()).build();
+                .addProperties(getVirtualSchemaProperties()).build();
         this.createdObjects.add(virtualSchema);
         return virtualSchema;
     }

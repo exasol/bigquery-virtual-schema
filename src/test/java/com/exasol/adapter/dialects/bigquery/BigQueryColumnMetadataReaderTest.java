@@ -2,29 +2,38 @@ package com.exasol.adapter.dialects.bigquery;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.sql.Types;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.BaseIdentifierConverter;
 import com.exasol.adapter.jdbc.JDBCTypeDescription;
 import com.exasol.adapter.metadata.DataType;
 import com.exasol.adapter.metadata.DataType.ExaCharset;
 
+@ExtendWith(MockitoExtension.class)
 class BigQueryColumnMetadataReaderTest {
-    private BigQueryColumnMetadataReader columnMetadataReader;
     private static final int VALUE_IGNORED = Integer.MAX_VALUE;
+    private BigQueryColumnMetadataReader columnMetadataReader;
+    @Mock
+    ExaMetadata exaMetadataMock;
 
     @BeforeEach
     void beforeEach() {
-        this.columnMetadataReader = new BigQueryColumnMetadataReader(null, AdapterProperties.emptyProperties(),
+        when(exaMetadataMock.getDatabaseVersion()).thenReturn("3.2.1");
+        this.columnMetadataReader = new BigQueryColumnMetadataReader(null, AdapterProperties.emptyProperties(), exaMetadataMock,
                 BaseIdentifierConverter.createDefault());
     }
 

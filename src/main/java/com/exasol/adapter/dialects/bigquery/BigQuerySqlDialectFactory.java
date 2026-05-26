@@ -1,9 +1,6 @@
 package com.exasol.adapter.dialects.bigquery;
 
-import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectFactory;
-import com.exasol.adapter.jdbc.ConnectionFactory;
+import com.exasol.adapter.dialects.*;
 import com.exasol.logging.VersionCollector;
 
 /**
@@ -16,8 +13,8 @@ public class BigQuerySqlDialectFactory implements SqlDialectFactory {
     }
 
     @Override
-    public SqlDialect createSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        return new BigQuerySqlDialect(connectionFactory, properties);
+    public SqlDialect createSqlDialect(final JDBCAdapterContext context) {
+        return new BigQuerySqlDialect(context);
     }
 
     @Override
@@ -25,5 +22,10 @@ public class BigQuerySqlDialectFactory implements SqlDialectFactory {
         final VersionCollector versionCollector = new VersionCollector(
                 "META-INF/maven/com.exasol/bigquery-virtual-schema/pom.properties");
         return versionCollector.getVersionNumber();
+    }
+
+    @Override
+    public String getAdapterProjectShortTag() {
+        return "VSBIGQ";
     }
 }

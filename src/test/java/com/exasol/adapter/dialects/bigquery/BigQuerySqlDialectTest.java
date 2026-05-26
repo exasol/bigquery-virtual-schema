@@ -14,6 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -27,10 +28,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.JDBCAdapterContext;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.rewriting.ImportIntoTemporaryTableQueryRewriter;
 import com.exasol.adapter.jdbc.ConnectionFactory;
@@ -42,11 +44,13 @@ import com.exasol.adapter.sql.ScalarFunction;
 class BigQuerySqlDialectTest {
     private BigQuerySqlDialect dialect;
     @Mock
-    private ConnectionFactory connectionFactoryMock;
+    ConnectionFactory connectionFactoryMock;
+    @Mock
+    ExaMetadata exaMetadataMock;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new BigQuerySqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
+        this.dialect = testee(AdapterProperties.emptyProperties());
     }
 
     @Test
@@ -128,7 +132,7 @@ class BigQuerySqlDialectTest {
                 containsInAnyOrder(CONNECTION_NAME_PROPERTY, CATALOG_NAME_PROPERTY, SCHEMA_NAME_PROPERTY,
                         TABLE_FILTER_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
                         LOG_LEVEL_PROPERTY, BIGQUERY_ENABLE_IMPORT_PROPERTY, TableCountLimit.MAXTABLES_PROPERTY,
-                        DataTypeDetection.STRATEGY_PROPERTY));
+                        DataTypeDetection.STRATEGY_PROPERTY, "TELEMETRY"));
     }
 
     @CsvSource({ "5Customers, `5Customers`", //
@@ -167,16 +171,18 @@ class BigQuerySqlDialectTest {
 
     @Test
     void testCreateQueryRewriterBigQueryRewriter(@Mock final Connection connectionMock) throws SQLException {
-        Mockito.when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
+        when(exaMetadataMock.getDatabaseVersion()).thenReturn("3.2.1");
+        when(this.connectionFactoryMock.getConnection()).thenReturn(connectionMock);
         assertThat(this.dialect.createQueryRewriter(), instanceOf(BigQueryQueryRewriter.class));
     }
 
     @Test
     void testCreateQueryRewriterBaseQueryRewriter(@Mock final ConnectionFactory connectionFactory) {
+        when(exaMetadataMock.getDatabaseVersion()).thenReturn("3.2.1");
         final AdapterProperties adapterProperties = new AdapterProperties(
                 Map.of(BIGQUERY_ENABLE_IMPORT_PROPERTY, "TRUE"));
-        final BigQuerySqlDialect dialect = new BigQuerySqlDialect(connectionFactory, adapterProperties);
-        assertThat(dialect.createQueryRewriter(), instanceOf(ImportIntoTemporaryTableQueryRewriter.class));
+        final BigQuerySqlDialect customDialect = testee(adapterProperties);
+        assertThat(customDialect.createQueryRewriter(), instanceOf(ImportIntoTemporaryTableQueryRewriter.class));
     }
 
     @Test
@@ -184,11 +190,16 @@ class BigQuerySqlDialectTest {
         final AdapterProperties adapterProperties = new AdapterProperties(Map.of( //
                 BIGQUERY_ENABLE_IMPORT_PROPERTY, "WRONG VALUE", //
                 CONNECTION_NAME_PROPERTY, "CONNECTION_NAME_PROPERTY"));
-        final BigQuerySqlDialect dialect = new BigQuerySqlDialect(null, adapterProperties);
+        final BigQuerySqlDialect customDialect = testee(adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                dialect::validateProperties);
+                customDialect::validateProperties);
         assertThat(exception.getMessage(),
                 equalTo("E-VSCJDBC-15: The value 'WRONG VALUE' for property 'BIGQUERY_ENABLE_IMPORT' is invalid."
                         + " It has to be either 'true' or 'false' (case insensitive)."));
+    }
+
+    BigQuerySqlDialect testee(final AdapterProperties properties) {
+        return new BigQuerySqlDialect(
+                JDBCAdapterContext.builder().connectionFactory(connectionFactoryMock).properties(properties).metadata(exaMetadataMock).build());
     }
 }

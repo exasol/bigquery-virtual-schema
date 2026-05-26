@@ -42,3 +42,4 @@ venv/
 /test.properties
 /google-service-account-key.json
 /.apt_generated_tests/
+/.serena/
