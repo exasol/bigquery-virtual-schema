@@ -181,8 +181,8 @@ class BigQuerySqlDialectTest {
         when(exaMetadataMock.getDatabaseVersion()).thenReturn("3.2.1");
         final AdapterProperties adapterProperties = new AdapterProperties(
                 Map.of(BIGQUERY_ENABLE_IMPORT_PROPERTY, "TRUE"));
-        final BigQuerySqlDialect dialect = testee(adapterProperties);
-        assertThat(dialect.createQueryRewriter(), instanceOf(ImportIntoTemporaryTableQueryRewriter.class));
+        final BigQuerySqlDialect customDialect = testee(adapterProperties);
+        assertThat(customDialect.createQueryRewriter(), instanceOf(ImportIntoTemporaryTableQueryRewriter.class));
     }
 
     @Test
@@ -190,9 +190,9 @@ class BigQuerySqlDialectTest {
         final AdapterProperties adapterProperties = new AdapterProperties(Map.of( //
                 BIGQUERY_ENABLE_IMPORT_PROPERTY, "WRONG VALUE", //
                 CONNECTION_NAME_PROPERTY, "CONNECTION_NAME_PROPERTY"));
-        final BigQuerySqlDialect dialect = testee(adapterProperties);
+        final BigQuerySqlDialect customDialect = testee(adapterProperties);
         final PropertyValidationException exception = assertThrows(PropertyValidationException.class,
-                dialect::validateProperties);
+                customDialect::validateProperties);
         assertThat(exception.getMessage(),
                 equalTo("E-VSCJDBC-15: The value 'WRONG VALUE' for property 'BIGQUERY_ENABLE_IMPORT' is invalid."
                         + " It has to be either 'true' or 'false' (case insensitive)."));
