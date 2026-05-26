@@ -55,6 +55,7 @@ class BigQueryQueryRewriterTest extends AbstractQueryRewriterTestBase {
         final Connection connectionMock = this.mockConnection();
         this.statement = Mockito.mock(SqlStatement.class);
         when(connectionFactoryMock.getConnection()).thenReturn(connectionMock);
+        when(exaMetadata.getDatabaseVersion()).thenReturn("3.2.1");
         final SqlDialectFactory factory = new BigQuerySqlDialectFactory();
         final SqlDialect dialect = factory.createSqlDialect(
                 JDBCAdapterContext.builder().properties(AdapterProperties.emptyProperties()).connectionFactory(connectionFactoryMock).build());

@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 
@@ -29,6 +30,7 @@ class BigQueryMetadataReaderTest {
 
     @BeforeEach
     void beforeEach() {
+        when(metadataMock.getDatabaseVersion()).thenReturn("3.2.1");
         this.reader = new BigQueryMetadataReader(this.connectionMock, AdapterProperties.emptyProperties(), metadataMock);
     }
 
