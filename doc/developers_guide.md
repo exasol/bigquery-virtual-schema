@@ -28,6 +28,8 @@ When `udfLoggingEnabled` is set to `true`, UDF logs will be written to `target/u
 
 As long as the emulator is not yet ready you need to manually enable it.
 
+The Simba JDBC driver 1.7 validates the `RootURL` connection property as a Private Service Connect BigQuery URI and rejects the emulator's plain HTTP endpoint with `[Simba][BigQueryJDBCDriver](100007) Failed to retrieve: PSC end point does not have correct value.`.
+
 1. Remove `test.properties` or one of the properties `googleProjectId`, `serviceAccountEmail`, or `privateKeyPath` in the file.
 2. Remove the `assumeTrue` call from `BigQueryVirtualSchemaIT.beforeAll()`.
 
