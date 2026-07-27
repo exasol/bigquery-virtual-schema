@@ -24,7 +24,7 @@
 | [Matcher for SQL Result Sets][18]               | [MIT License][19]                              |
 | [BigQuery][20]                                  | [Apache-2.0][21]                               |
 | [Jackson-core][22]                              | [The Apache Software License, Version 2.0][21] |
-| jackson-annotations                             |                                                |
+| [Jackson-annotations][23]                       | [The Apache Software License, Version 2.0][21] |
 | [jackson-databind][23]                          | [The Apache Software License, Version 2.0][21] |
 
 ## Runtime Dependencies
