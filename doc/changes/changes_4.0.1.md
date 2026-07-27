@@ -1,4 +1,4 @@
-# Virtual Schema for BigQuery 4.0.1, released 2026-??-??
+# Virtual Schema for BigQuery 4.0.1, released 2026-07-27
 
 Code name: Fixed vulnerabilities CVE-2026-9563, CVE-2026-54512, CVE-2026-54513, CVE-2026-54514, CVE-2026-54515, CVE-2026-54518, CVE-2026-59888, CVE-2026-59889
 
