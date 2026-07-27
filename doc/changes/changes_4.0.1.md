@@ -92,6 +92,9 @@ Jackson Databind -  Authorization bypass on JsonView Setter/Field
 * Updated `com.exasol:exasol-test-setup-abstraction-java:2.1.11` to `2.1.12`
 * Updated `com.exasol:test-db-builder-java:4.0.0` to `4.0.1`
 * Updated `com.exasol:virtual-schema-common-jdbc:14.0.2` to `14.0.4`
+* Added `com.fasterxml.jackson.core:jackson-annotations:2.22.1`
+* Added `com.fasterxml.jackson.core:jackson-core:2.22.1`
+* Added `com.fasterxml.jackson.core:jackson-databind:2.22.1`
 * Updated `com.google.cloud:google-cloud-bigquery:2.66.0` to `2.68.0`
 
 ### Plugin Dependency Updates
