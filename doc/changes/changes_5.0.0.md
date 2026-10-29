@@ -10,26 +10,6 @@ This update fixes 19 dependency vulnerabilities and records one finding awaiting
 
 This project now requires Java 17 for building and running and does not support Exasol v8 anymore.
 
-- Fixes #69
-- Fixes #70
-- Fixes #72
-- Fixes #74
-- Fixes #75
-- Fixes #76
-- Fixes #77
-- Fixes #79
-- Fixes #80
-- Fixes #82
-- Fixes #83
-- Fixes #84
-- Fixes #85
-- Fixes #86
-- Fixes #87
-- Fixes #88
-- Fixes #89
-- Fixes #90
-- Fixes #92
-
 ## Security
 
 * #74: Fixed CVE-2026-68498 (unbounded resource allocation) in dependency `com.fasterxml.jackson.core:jackson-core:jar:2.22.1:test`
