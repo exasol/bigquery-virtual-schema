@@ -19,7 +19,7 @@ Integration tests are prepared to use a local [bigquery-emulator](https://github
 
     udfLoggingEnabled = true
     ```
-    
+
 If file `test.properties` or one of `googleProjectId`, `serviceAccountEmail`, or `privateKeyPath` is missing, then integration tests will be skipped.
 
 When `udfLoggingEnabled` is set to `true`, UDF logs will be written to `target/udf-logs/*.txt`.
@@ -28,7 +28,7 @@ The Google Cloud integration test setup uses the standard Simba BigQuery JDBC UR
 
 ## Running Integration Tests Against BigQuery Emulator
 
-As long as the emulator is not yet ready you need to manually enable it.
+As long as the [bigquery-emulator](https://github.com/goccy/bigquery-emulator) is not yet ready you need to manually enable it.
 
 The Simba JDBC driver 1.7 validates the `RootURL` connection property as a Private Service Connect BigQuery URI and rejects the emulator's plain HTTP endpoint with `[Simba][BigQueryJDBCDriver](100007) Failed to retrieve: PSC end point does not have correct value.`.
 
@@ -38,5 +38,5 @@ The Simba JDBC driver 1.7 validates the `RootURL` connection property as a Priva
 For manual testing you can start the emulator with the following command:
 
 ```sh
-docker run --publish 9050:9050 --publish 9060:9060 ghcr.io/goccy/bigquery-emulator:0.6.6 --project=myProject --port=9050 --grpc-port=9060 --log-level=debug
+docker run --publish 9050:9050 --publish 9060:9060 ghcr.io/goccy/bigquery-emulator:0.8.1 --project=myProject --port=9050 --grpc-port=9060 --log-level=debug
 ```
