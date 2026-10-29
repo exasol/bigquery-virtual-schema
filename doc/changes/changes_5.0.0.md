@@ -1,10 +1,14 @@
-# Virtual Schema for BigQuery 5.0.0, released 2026-??-??
+# Virtual Schema for BigQuery 5.0.0, released 2026-10-30
 
 Code name: Security fixes
 
 ## Summary
 
 This update fixes 19 dependency vulnerabilities and records one finding awaiting a matching repository issue.
+
+## Breaking Change
+
+This project now requires Java 17 for building and running and does not support Exasol v8 anymore.
 
 - Fixes #69
 - Fixes #70
