@@ -104,7 +104,7 @@ public class IntegrationTestSetup implements AutoCloseable {
         final JdbcDriverProvider uploader = new JdbcDriverProvider(getBucket());
         // See latest version: https://docs.cloud.google.com/bigquery/docs/reference/odbc-jdbc-drivers
         final List<String> jarFiles = uploader.uploadJdbcDriverToBucketFs(
-                "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.7.0.1001.zip");
+                "https://storage.googleapis.com/simba-bq-release/jdbc/SimbaJDBCDriverforGoogleBigQuery42_1.8.1.1003.zip");
         final List<String> jars = new ArrayList<>();
         jars.add(BUCKETFS_ROOT_PATH + ADAPTER_JAR);
         jars.addAll(jarFiles);
