@@ -4,7 +4,7 @@ Code name: Security fixes
 
 ## Summary
 
-This update fixes 19 dependency vulnerabilities and records one finding awaiting a matching repository issue.
+This update fixes 19 dependency vulnerabilities in test dependencies.
 
 ## Breaking Change
 
@@ -15,7 +15,7 @@ This project now requires Java 17 for building and running and does not support 
 * #74: Fixed CVE-2026-68498 (unbounded resource allocation) in dependency `com.fasterxml.jackson.core:jackson-core:jar:2.22.1:test`
 * #79: Fixed CVE-2026-89407 (quadratic-time number validation) in dependency `com.fasterxml.jackson.core:jackson-core:jar:2.22.1:test`
 * #80: Fixed CVE-2026-89425 (unbounded error-token accumulation) in dependency `com.fasterxml.jackson.core:jackson-core:jar:2.22.1:test`
-* #90: Fixed CVE-2026-102554 (unsafe deserialization) in dependency `com.google.guava:guava:jar:33.5.0-jre:test`
+* #90: Fixed CVE-2026-102554 (unsafe deserialization) in dependency `com.google.guava:guava:jar:33.7.2-jre:test`
 * #88: Fixed CVE-2026-110262 (unbounded resource allocation) in dependency `org.ow2.asm:asm-commons:jar:9.9:test`
 * #89: Fixed CVE-2026-110270 (algorithmic complexity) in dependency `org.ow2.asm:asm-commons:jar:9.9:test`
 * #82: Fixed CVE-2026-110257 (uncontrolled memory allocation) in dependency `org.ow2.asm:asm:jar:9.9:test`
@@ -31,7 +31,7 @@ This project now requires Java 17 for building and running and does not support 
 * #76: Fixed CVE-2026-91777 (denial of service) in dependency `com.fasterxml.jackson.core:jackson-databind:jar:2.22.1:test`
 * #77: Fixed CVE-2026-83557 (unsafe deserialization) in dependency `com.fasterxml.jackson.core:jackson-databind:jar:2.22.1:test`
 * #72: Fixed CVE-2026-86231 (certificate revocation validation) in dependency `com.github.mwiede:jsch:jar:2.28.4:test`
-* CVE-2026-116486 (incorrect symbolic name mapping) in dependency `org.objenesis:objenesis:jar:3.3:test`
+* Fixed CVE-2026-116486 (incorrect symbolic name mapping) in dependency `org.objenesis:objenesis:jar:3.6:test`
 
 ## Dependency Updates
 

@@ -35,6 +35,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <!-- Fix CVE-2026-102554 in the test-only BigQuery client dependency. -->
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>33.7.2-jre</version>
+            </dependency>
+            <dependency>
+                <!-- Fix CVE-2026-116486 in the test-only Mockito dependency tree. -->
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>3.6</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
